@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - SmartBill</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+    <div class="background-elements">
+        <div class="blob blob1" style="background: radial-gradient(circle, #ff6b6b 0%, rgba(255,107,107,0) 70%); animation-delay: 0s;"></div>
+        <div class="blob blob2" style="background: radial-gradient(circle, #feca57 0%, rgba(254,202,87,0) 70%); animation-delay: 2s;"></div>
+    </div>
+
+    <div class="admin-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="admin-sidebar glass-panel">
+            <div class="admin-brand">
+                <h2>👑 SmartAdmin</h2>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a class="nav-item active" data-tab="overview">
+                    <span>📊</span> Overview
+                </a>
+                <a class="nav-item" data-tab="users">
+                    <span>👥</span> User Actions
+                </a>
+                <a class="nav-item" data-tab="complaints">
+                    <span>📩</span> Complaints
+                </a>
+                <a class="nav-item" data-tab="settings">
+                    <span>⚙️</span> Site Settings
+                </a>
+                <a class="nav-item" data-tab="founders">
+                    <span>🌟</span> We Founders
+                </a>
+            </nav>
+
+            <div class="admin-footer">
+                <button id="logout-btn" class="admin-logout">Sign Out</button>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="admin-main">
+            <!-- Dynamic Header -->
+            <header class="admin-header">
+                <div>
+                    <h1 id="page-title">Overview Dashboard</h1>
+                    <p style="color: var(--text-secondary); margin-top: 5px;">Manage users, complaints, and system settings.</p>
+                </div>
+                <div style="background: rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 12px; font-weight: 600;">
+                    Hello, System Admin
+                </div>
+            </header>
+
+            <!-- Overview Section -->
+            <section id="overview" class="tab-content active">
+                <div class="analytics-grid" style="margin-bottom: 2rem;">
+                    <div class="stat-card glass-panel" style="border-left: 4px solid var(--primary-color);">
+                        <h4>Platform Members</h4>
+                        <h2 id="total-users">0</h2>
+                    </div>
+                    <div class="stat-card glass-panel" style="border-left: 4px solid #ff6b6b;">
+                        <h4>Unresolved Complaints</h4>
+                        <h2 id="pending-complaints">0</h2>
+                    </div>
+                </div>
+                
+                <div class="glass-panel" style="padding: 2rem; text-align: center;">
+                    <h3 style="margin-bottom: 1rem; color: #a5b4fc;">Welcome back!</h3>
+                    <p style="color: #a0aec0; max-width: 600px; margin: 0 auto;">Select "User Actions" from the sidebar to manage platform access levels, or jump into "Complaints" to assist members in need.</p>
+                </div>
+            </section>
+
+            <!-- User Actions Section -->
+            <section id="users" class="tab-content">
+                <div class="admin-table-container">
+                    <div class="table-header-row">
+                        <div class="table-title">Members List</div>
+                        <input type="text" placeholder="Search members..." style="padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid var(--glass-border); background: rgba(0,0,0,0.2); color: #fff;">
+                    </div>
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email Address</th>
+                                <th>Join Date</th>
+                                <th>Account Status</th>
+                                <th>Administrative Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-list">
+                            <!-- Injected -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+        <!-- Complaints Section -->
+            <section id="complaints" class="tab-content">
+                <div class="admin-table-container">
+                    <div class="table-header-row">
+                        <div class="table-title">Incoming Support Tickets</div>
+                        <button class="secondary-btn" style="padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="fetchComplaints()">↻ Refresh</button>
+                    </div>
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Sender (User)</th>
+                                <th>Ticket Subject</th>
+                                <th>Message Snippet</th>
+                                <th>Submitted On</th>
+                                <th>Status</th>
+                                <th>Resolution</th>
+                            </tr>
+                        </thead>
+                        <tbody id="complaints-list">
+                            <!-- Injected -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Site Settings Section -->
+            <section id="settings" class="tab-content">
+                <div class="glass-panel" style="max-width: 600px; margin: 0 auto; padding: 2rem;">
+                    <h3 style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px;">Contact & Support Details</h3>
+                    <form id="admin-settings-form">
+                        <div class="input-group" style="margin-bottom: 1rem;">
+                            <label style="display:block; margin-bottom: 0.5rem; color: #cbd5e1;">Support Email</label>
+                            <input type="email" id="set-email" required style="width:100%; padding: 10px; border-radius: 8px; border: 1px solid var(--glass-border); background: rgba(0,0,0,0.2); color: white;">
+                        </div>
+                        <div class="input-group" style="margin-bottom: 1rem;">
+                            <label style="display:block; margin-bottom: 0.5rem; color: #cbd5e1;">Support Phone</label>
+                            <input type="text" id="set-phone" required style="width:100%; padding: 10px; border-radius: 8px; border: 1px solid var(--glass-border); background: rgba(0,0,0,0.2); color: white;">
+                        </div>
+                        <div class="input-group" style="margin-bottom: 1.5rem;">
+                            <label style="display:block; margin-bottom: 0.5rem; color: #cbd5e1;">Headquarters Address</label>
+                            <input type="text" id="set-address" required style="width:100%; padding: 10px; border-radius: 8px; border: 1px solid var(--glass-border); background: rgba(0,0,0,0.2); color: white;">
+                        </div>
+                        <button type="submit" class="primary-btn" style="width: 100%;">Save Settings</button>
+                    </form>
+
+                    <h3 style="margin-top: 3rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px;">Change My Password</h3>
+                    <form id="admin-password-form">
+                        <div class="input-group" style="margin-bottom: 1rem;">
+                            <label style="display:block; margin-bottom: 0.5rem; color: #cbd5e1;">Current Password</label>
+                            <input type="password" id="set-current-pwd" required style="width:100%; padding: 10px; border-radius: 8px; border: 1px solid var(--glass-border); background: rgba(0,0,0,0.2); color: white;">
+                        </div>
+                        <div class="input-group" style="margin-bottom: 1.5rem;">
+                            <label style="display:block; margin-bottom: 0.5rem; color: #cbd5e1;">New Password</label>
+                            <input type="password" id="set-new-pwd" required style="width:100%; padding: 10px; border-radius: 8px; border: 1px solid var(--glass-border); background: rgba(0,0,0,0.2); color: white;">
+                        </div>
+                        <button type="submit" class="primary-btn" style="background:var(--secondary-color); width: 100%;">Update My Password</button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Founders Section -->
+            <section id="founders" class="tab-content">
+                <div class="admin-table-container" style="display: flex; gap: 2rem; flex-wrap: wrap; background: transparent; border: none; padding: 0;">
+                    
+                    <!-- Add Founder Form -->
+                    <div class="glass-panel" style="flex: 1; min-width: 300px; padding: 2rem; height: fit-content;">
+                        <h3 style="margin-bottom: 1.5rem;">Add New Founder</h3>
+                        <form id="add-founder-form">
+                            <div class="input-group" style="margin-bottom: 1rem;">
+                                <label style="display:block; margin-bottom: 0.5rem; color: #cbd5e1;">Founder Name</label>
+                                <input type="text" id="founder-name" required style="width:100%; padding: 10px; border-radius: 8px; border: 1px solid var(--glass-border); background: rgba(0,0,0,0.2); color: white;">
+                            </div>
+                            <div class="input-group" style="margin-bottom: 1rem;">
+                                <label style="display:block; margin-bottom: 0.5rem; color: #cbd5e1;">Role & Description</label>
+                                <textarea id="founder-desc" required rows="3" style="width:100%; padding: 10px; border-radius: 8px; border: 1px solid var(--glass-border); background: rgba(0,0,0,0.2); color: white; resize: none;"></textarea>
+                            </div>
+                            <div class="input-group" style="margin-bottom: 1.5rem;">
+                                <label style="display:block; margin-bottom: 0.5rem; color: #cbd5e1;">Profile Photo (Max 5MB)</label>
+                                <input type="file" id="founder-photo" accept="image/*" required style="width:100%; padding: 10px; border-radius: 8px; border: 1px solid var(--glass-border); background: rgba(0,0,0,0.2); color: white;">
+                            </div>
+                            <button type="submit" class="primary-btn" style="width: 100%;">Upload Founder Profile</button>
+                        </form>
+                    </div>
+
+                    <!-- Manage Founders -->
+                    <div class="glass-panel" style="flex: 2; min-width: 400px; padding: 2rem;">
+                        <h3 style="margin-bottom: 1.5rem;">Active Founders</h3>
+                        <div id="founders-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.5rem;">
+                            <!-- Injected -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Custom Modal -->
+    <div id="custom-modal" class="modal-overlay" style="display:none; align-items:center; justify-content:center; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7); z-index:9999;">
+        <div class="modal-content glass-panel" style="max-width:400px; width:90%; padding:2rem; text-align:center;">
+            <h3 id="modal-title" style="margin-bottom:1rem;">Title</h3>
+            <p id="modal-msg" style="margin-bottom:1.5rem; color:var(--text-secondary);">Message</p>
+            <input type="text" id="modal-input" style="display:none; width:100%; padding:10px; border-radius:8px; border:1px solid var(--glass-border); background:rgba(0,0,0,0.2); color:white; margin-bottom:1.5rem;">
+            <div class="modal-actions" style="display:flex; gap:10px; justify-content:center;">
+                <button id="modal-cancel-btn" class="secondary-btn" style="padding:8px 16px;">Cancel</button>
+                <button id="modal-confirm-btn" class="primary-btn" style="padding:8px 16px;">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/admin.js"></script>
+</body>
+</html>

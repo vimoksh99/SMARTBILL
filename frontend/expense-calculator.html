@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monthly Expense Calculator</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- External CSS -->
+    <link rel="stylesheet" href="./css/expense-calculator.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Main Dashboard Area -->
+        <main class="dashboard-panel glass-panel">
+            <header class="dashboard-header">
+                <h1>Monthly Expense Calculator</h1>
+                <p>Track your spending with stunning visualizations.</p>
+            </header>
+
+            <div class="summary-cards">
+                <div class="card summary-card salary-card">
+                    <span class="card-label">Monthly Salary</span>
+                    <h2 class="card-value" id="salaryDisplayValue">₹0</h2>
+                </div>
+                <div class="card summary-card total-expense">
+                    <span class="card-label">Total Expenses</span>
+                    <h2 class="card-value" id="totalExpensesValue">₹0</h2>
+                </div>
+                <div class="card summary-card savings-card">
+                    <span class="card-label">Savings</span>
+                    <h2 class="card-value" id="savingsValue" style="color: var(--secondary-color);">₹0</h2>
+                </div>
+                <div class="card summary-card highest-cat">
+                    <span class="card-label">Highest Expense</span>
+                    <h2 class="card-value" id="highestExpenseValue">None</h2>
+                </div>
+            </div>
+
+            <div id="warningBanner" class="warning-banner hidden">
+                ⚠️ Warning: Your expenses have exceeded the monthly limit!
+            </div>
+
+            <div class="chart-container">
+                <canvas id="expenseChart"></canvas>
+            </div>
+
+            <div class="dashboard-actions">
+                <button class="primary-btn" id="openEntryBtn">Calculate Expenses</button>
+                <button class="secondary-btn" id="resetBtn">Reset All</button>
+            </div>
+        </main>
+
+        <!-- Expense Entry Sliding Panel (Overlay) -->
+        <div class="entry-overlay" id="entryOverlay">
+            <div class="entry-panel glass-panel">
+                <button class="close-btn" id="closeEntryBtn">&times;</button>
+                <div class="panel-header">
+                    <h2>Expense Entry</h2>
+                    <p id="slideIndicator">1 / 7</p>
+                </div>
+                
+                <div class="slider-viewport">
+                    <div class="slider-track" id="sliderTrack">
+                        <!-- Slides will be injected dynamically via JS -->
+                    </div>
+                </div>
+
+                <div class="slider-controls">
+                    <button class="control-btn" id="prevSlideBtn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                        Previous
+                    </button>
+                    <button class="control-btn" id="nextSlideBtn">
+                        Next
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- External JS -->
+    <script src="./js/expense-calculator.js"></script>
+</body>
+</html>

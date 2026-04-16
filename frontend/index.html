@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartBill - Payment Reminder</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="auth-page">
+    <div class="background-elements">
+        <div class="blob blob1"></div>
+        <div class="blob blob2"></div>
+    </div>
+
+    <div class="auth-container glass-panel">
+        <div class="auth-header">
+            <h1>SmartBill</h1>
+            <p>Never miss a payment again.</p>
+        </div>
+
+        <div class="auth-tabs">
+            <button class="tab-btn active" id="tab-login" onclick="switchTab('login')">Login</button>
+            <button class="tab-btn" id="tab-signup" onclick="switchTab('signup')">Sign Up</button>
+        </div>
+
+        <!-- Login Form -->
+        <form id="login-form" class="auth-form active">
+            <div class="input-group">
+                <label>Email</label>
+                <input type="email" id="login-email" required placeholder="you@example.com">
+            </div>
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" id="login-password" required placeholder="••••••••">
+            </div>
+            <div style="text-align: right; margin-top: -10px; margin-bottom: 15px;">
+                <a href="#" onclick="switchTab('forgot-email')" style="color: var(--primary-color); font-size: 0.9rem; text-decoration: none;">Forgot Password?</a>
+            </div>
+            <button type="submit" class="primary-btn submit-btn">Log In</button>
+            <div class="error-msg" id="login-error"></div>
+        </form>
+
+        <!-- Signup Form -->
+        <form id="signup-form" class="auth-form">
+            <div class="input-group">
+                <label>Full Name</label>
+                <input type="text" id="signup-name" required placeholder="John Doe">
+            </div>
+            <div class="input-group">
+                <label>Email</label>
+                <input type="email" id="signup-email" required placeholder="you@example.com">
+            </div>
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" id="signup-password" required placeholder="••••••••">
+            </div>
+            <button type="submit" class="primary-btn submit-btn">Create Account</button>
+            <div class="error-msg" id="signup-error"></div>
+        </form>
+
+        <!-- Verify OTP Form -->
+        <form id="verify-otp-form" class="auth-form">
+            <h3 style="margin-bottom: 15px; font-weight: 600;">Verification Required</h3>
+            <p style="margin-bottom: 20px; font-size: 0.9rem; color: #666;" id="verify-message">We've sent an OTP to your email.</p>
+            <div class="input-group">
+                <label>6-Digit OTP</label>
+                <input type="text" id="verify-otp-input" required placeholder="123456" pattern="[0-9]{6}">
+            </div>
+            <button type="submit" class="primary-btn submit-btn">Verify & Proceed</button>
+            <div style="text-align: center; margin-top: 15px;">
+                <a href="#" onclick="switchTab('login')" style="color: #666; font-size: 0.9rem; text-decoration: none;">Cancel</a>
+            </div>
+            <div class="error-msg" id="verify-otp-error"></div>
+        </form>
+
+        <!-- Forgot Password (Email Step) Form -->
+        <form id="forgot-email-form" class="auth-form">
+            <h3 style="margin-bottom: 15px; font-weight: 600;">Reset Password</h3>
+            <p style="margin-bottom: 20px; font-size: 0.9rem; color: #666;">Enter your registered email. We will send a 6-digit OTP to your Email.</p>
+            <div class="input-group">
+                <label>Email</label>
+                <input type="email" id="forgot-email-input" required placeholder="you@example.com">
+            </div>
+            <button type="submit" class="primary-btn submit-btn">Send OTP</button>
+            <div style="text-align: center; margin-top: 15px;">
+                <a href="#" onclick="switchTab('login')" style="color: #666; font-size: 0.9rem; text-decoration: none;">&larr; Back to Login</a>
+            </div>
+            <div class="error-msg" id="forgot-email-error"></div>
+        </form>
+
+        <!-- Reset Password (OTP Step) Form -->
+        <form id="reset-password-form" class="auth-form">
+            <h3 style="margin-bottom: 15px; font-weight: 600;">Enter OTP & New Password</h3>
+            <div class="input-group">
+                <label>6-Digit OTP</label>
+                <input type="text" id="reset-otp" required placeholder="123456" pattern="[0-9]{6}">
+            </div>
+            <div class="input-group">
+                <label>New Password</label>
+                <input type="password" id="reset-new-password" required placeholder="••••••••" minlength="6">
+            </div>
+            <button type="submit" class="primary-btn submit-btn">Reset Password & Login</button>
+            <div style="text-align: center; margin-top: 15px;">
+                <a href="#" onclick="switchTab('login')" style="color: #666; font-size: 0.9rem; text-decoration: none;">Cancel</a>
+            </div>
+            <div class="error-msg" id="reset-password-error"></div>
+        </form>
+    </div>
+
+    <script src="js/auth.js"></script>
+</body>
+</html>
