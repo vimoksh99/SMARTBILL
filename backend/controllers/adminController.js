@@ -83,7 +83,7 @@ exports.getComplaints = async (req, res, next) => {
 // @access  Private/Admin
 exports.updateComplaintStatus = async (req, res, next) => {
     try {
-        const complaint = await Complaint.findById(req.params.id);
+        const complaint = await Complaint.findById(req.params.id).populate('user', 'name email');
         if (!complaint) {
             return sendResponse(res, 404, false, 'Complaint not found');
         }
@@ -91,6 +91,32 @@ exports.updateComplaintStatus = async (req, res, next) => {
         complaint.status = req.body.status || 'Resolved';
         if (req.body.reply) {
             complaint.adminReply = req.body.reply;
+            
+            // Send email notification to the user about their resolved complaint
+            if (complaint.user && complaint.user.email) {
+                const sendEmail = require('../utils/emailService');
+                const message = `
+                    <h2>Support Ticket Update</h2>
+                    <p>Dear ${complaint.user.name},</p>
+                    <p>The admin has responded to your support ticket regarding: <strong>${complaint.subject}</strong></p>
+                    <div style="padding: 15px; border-left: 4px solid #8b5cf6; background: #f3f4f6; margin: 15px 0;">
+                        <p style="margin: 0; color: #4b5563;"><strong>Admin Reply:</strong></p>
+                        <p style="margin: 5px 0 0 0; color: #111827;">${req.body.reply}</p>
+                    </div>
+                    <p>Best Regards,</p>
+                    <p>SmartBill Support Team</p>
+                `;
+                
+                try {
+                    await sendEmail({
+                        email: complaint.user.email,
+                        subject: 'Re: ' + complaint.subject,
+                        message
+                    });
+                } catch(emailErr) {
+                    console.log('Failed to send complaint reply email', emailErr);
+                }
+            }
         }
         await complaint.save();
 

@@ -4,6 +4,22 @@ if (!token) {
     window.location.href = './index.html';
 }
 
+// Global Fetch Interceptor to handle Block/Delete instantly
+const originalFetch = window.fetch;
+window.fetch = async (...args) => {
+    const res = await originalFetch(...args);
+    // 401/403 meaning Blocked or Deleted
+    if (res.status === 401 || res.status === 403) {
+        if (args[0] && String(args[0]).includes('/api/')) {
+            alert('Your account has been removed or blocked by the admin.');
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = './index.html';
+        }
+    }
+    return res;
+};
+
 document.getElementById('logout-btn').addEventListener('click', async () => {
     try {
         await fetch('https://smartbill-vqjf.onrender.com/api/auth/logout');

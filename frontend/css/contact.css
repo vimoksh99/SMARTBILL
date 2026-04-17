@@ -187,7 +187,7 @@
     opacity: 1;
 }
 
-@media(max-width: 900px) {
+@media(max-width: 1024px) {
     .contact-wrapper {
         padding: 1.5rem 1rem;
     }

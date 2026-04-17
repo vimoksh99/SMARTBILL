@@ -36,6 +36,7 @@
     font-weight: 800;
     background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     letter-spacing: -0.5px;
     display: flex;
@@ -182,7 +183,7 @@
     font-weight: 700;
 }
 
-@media(max-width: 900px) {
+@media(max-width: 1024px) {
     .admin-layout {
         flex-direction: column;
     }

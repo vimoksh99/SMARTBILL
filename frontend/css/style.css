@@ -112,6 +112,7 @@ h1, h2, h3, h4 {
     font-weight: 800;
     background: linear-gradient(135deg, #a5b4fc 0%, #6366f1 100%);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     letter-spacing: -1px;
 }
@@ -308,6 +309,7 @@ h1, h2, h3, h4 {
     font-weight: 800;
     background: linear-gradient(135deg, #a5b4fc, #6366f1);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     letter-spacing: -0.5px;
 }
@@ -530,7 +532,7 @@ h1, h2, h3, h4 {
     margin-bottom: 0.5rem;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     .auth-page {
         padding: 1rem;
     }

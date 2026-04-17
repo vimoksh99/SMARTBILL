@@ -69,6 +69,7 @@ body {
     margin-bottom: 0.5rem;
     background: linear-gradient(to right, #818cf8, #c084fc);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
@@ -372,7 +373,7 @@ button {
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     body {
         padding: 1rem;
     }
