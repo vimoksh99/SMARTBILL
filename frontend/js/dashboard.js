@@ -42,15 +42,99 @@ async function fetchAnalytics() {
     }
 }
 
+let notificationsData = [];
+
 async function fetchNotifications() {
-    const res = await fetch('https://smartbill-vqjf.onrender.com/api/notifications', {
-        headers: { 'Authorization': `Bearer ${token}` }
-    });
-    const { success, data } = await res.json();
-    if(success) {
-        const unread = data.filter(n => !n.read).length;
-        document.getElementById('notif-count').innerText = unread;
+    try {
+        const res = await fetch('https://smartbill-vqjf.onrender.com/api/notifications', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const { success, data } = await res.json();
+        if(success) {
+            notificationsData = data;
+            renderNotifications();
+        }
+    } catch(err) { console.error(err); }
+}
+
+function renderNotifications() {
+    const unread = notificationsData.filter(n => !n.read).length;
+    const countBadge = document.getElementById('notif-count');
+    if(countBadge) {
+        countBadge.innerText = unread;
+        countBadge.style.display = unread > 0 ? 'inline-block' : 'none';
     }
+
+    const body = document.getElementById('notif-body');
+    if (!body) return;
+    
+    body.innerHTML = '';
+    
+    if (notificationsData.length === 0) {
+        body.innerHTML = '<div style="padding: 1.5rem; text-align: center; color: var(--text-secondary); font-size: 0.9rem;">No notifications yet.</div>';
+        return;
+    }
+
+    notificationsData.forEach(n => {
+        const item = document.createElement('div');
+        item.className = `notif-item ${n.read ? '' : 'unread'}`;
+        item.onclick = (e) => {
+            e.stopPropagation();
+            if(!n.read) markAsRead(n._id);
+        };
+        
+        const dateStr = new Date(n.createdAt).toLocaleDateString() + ' ' + new Date(n.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        
+        item.innerHTML = `
+            <p>${n.message}</p>
+            <small>${dateStr}</small>
+        `;
+        body.appendChild(item);
+    });
+}
+
+async function markAsRead(id) {
+    try {
+        const res = await fetch(`https://smartbill-vqjf.onrender.com/api/notifications/${id}/read`, {
+            method: 'PUT',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if(res.ok) fetchNotifications();
+    } catch(err) { console.error(err); }
+}
+
+async function markAllAsRead(e) {
+    if(e) e.stopPropagation();
+    try {
+        const unreadNotifs = notificationsData.filter(n => !n.read);
+        for(let n of unreadNotifs) {
+            await fetch(`https://smartbill-vqjf.onrender.com/api/notifications/${n._id}/read`, {
+                method: 'PUT',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+        }
+        fetchNotifications();
+    } catch(err) { console.error(err); }
+}
+
+// Dropdown Toggle Setup
+const notifBtn = document.getElementById('notif-icon-btn');
+const notifDropdown = document.getElementById('notif-dropdown');
+if(notifBtn && notifDropdown) {
+    notifBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isShowing = notifDropdown.style.display === 'flex';
+        notifDropdown.style.display = isShowing ? 'none' : 'flex';
+    });
+    
+    document.addEventListener('click', (e) => {
+        if (!notifDropdown.contains(e.target) && !notifBtn.contains(e.target)) {
+            notifDropdown.style.display = 'none';
+        }
+    });
+
+    const markAllBtn = document.getElementById('mark-all-read');
+    if(markAllBtn) markAllBtn.addEventListener('click', markAllAsRead);
 }
 
 async function fetchBills() {

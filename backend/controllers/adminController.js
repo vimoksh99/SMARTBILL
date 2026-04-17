@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const Complaint = require('../models/Complaint');
+const Notification = require('../models/Notification');
 const sendResponse = require('../utils/responseFormatter');
 
 // @desc    Get all users
@@ -113,8 +114,15 @@ exports.updateComplaintStatus = async (req, res, next) => {
                         subject: 'Re: ' + complaint.subject,
                         message
                     });
+                    
+                    // Also fire an in-app notification for the bell
+                    await Notification.create({
+                        userId: complaint.user._id,
+                        message: `Admin resolved your ticket: ${complaint.subject}. See email for details.`,
+                        type: 'info'
+                    });
                 } catch(emailErr) {
-                    console.log('Failed to send complaint reply email', emailErr);
+                    console.log('Failed to send complaint reply email or notification', emailErr);
                 }
             }
         }

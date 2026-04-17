@@ -14,8 +14,18 @@
         <div class="nav-brand">SmartBill</div>
         <div class="nav-items">
             <span id="user-greeting">Hello, User</span>
-            <div class="notification-icon">
-                🔔 <span id="notif-count" class="badge">0</span>
+            <div class="notification-icon" id="notif-icon-btn">
+                🔔 <span id="notif-count" class="badge" style="display: none;">0</span>
+                <!-- Dropdown -->
+                <div class="notif-dropdown glass-panel" id="notif-dropdown" style="display: none;">
+                    <div class="notif-header">
+                        <h4>Notifications</h4>
+                        <button id="mark-all-read" style="background:none; border:none; color:var(--accent-color); cursor:pointer; font-size:0.8rem; font-weight:600;">Dismiss All</button>
+                    </div>
+                    <div class="notif-body" id="notif-body">
+                        <!-- notifications injected here -->
+                    </div>
+                </div>
             </div>
             <a href="expense-calculator.html" style="color: #fff; text-decoration: none; font-weight: 600; margin-right: 15px;">Expense Calculator</a>
             <a href="contact.html" style="color: #fff; text-decoration: none; font-weight: 600; margin-right: 15px;">Support</a>

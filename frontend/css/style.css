@@ -350,6 +350,75 @@ h1, h2, h3, h4 {
     border: 2px solid var(--bg-primary);
 }
 
+.notif-dropdown {
+    position: absolute;
+    top: 150%;
+    right: -10px;
+    width: 320px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 1000;
+    transform-origin: top right;
+    animation: popIn 0.2s ease;
+    cursor: default;
+}
+
+.notif-header {
+    display: flex; 
+    justify-content: space-between; 
+    padding: 1rem; 
+    border-bottom: 1px solid var(--glass-border); 
+    background: rgba(0,0,0,0.2);
+}
+
+.notif-header h4 {
+    margin: 0;
+    font-size: 1rem;
+    color: white;
+}
+
+.notif-body {
+    overflow-y: auto;
+    max-height: 340px;
+}
+
+.notif-item {
+    padding: 1rem; 
+    border-bottom: 1px solid rgba(255,255,255,0.05); 
+    transition: background 0.2s; 
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+}
+
+.notif-item:last-child {
+    border-bottom: none;
+}
+
+.notif-item.unread { 
+    background: rgba(99, 102, 241, 0.15); 
+    border-left: 3px solid var(--accent-color);
+}
+
+.notif-item:hover { 
+    background: rgba(255,255,255,0.05); 
+}
+
+.notif-item p { 
+    margin: 0; 
+    font-size: 0.9rem; 
+    color: var(--text-primary); 
+    line-height: 1.4;
+}
+
+.notif-item small { 
+    color: var(--text-secondary); 
+    font-size: 0.75rem; 
+}
+
 .dashboard-container {
     padding: 2.5rem 5%;
     max-width: 1400px;
