@@ -6,7 +6,7 @@ if (!token) {
 
 document.getElementById('logout-btn').addEventListener('click', async () => {
     try {
-        await fetch('http://localhost:3000/api/auth/logout');
+        await fetch('https://smartbill-vqjf.onrender.com/api/auth/logout');
     } catch (err) {}
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -25,7 +25,7 @@ document.getElementById('complaint-form').addEventListener('submit', async (e) =
     submitBtn.style.opacity = '0.7';
 
     try {
-        const res = await fetch('http://localhost:3000/api/complaints', {
+        const res = await fetch('https://smartbill-vqjf.onrender.com/api/complaints', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -64,7 +64,7 @@ document.getElementById('complaint-form').addEventListener('submit', async (e) =
 // Fetch My Tickets
 window.fetchMyTickets = async () => {
     try {
-        const res = await fetch('http://localhost:3000/api/complaints/my', {
+        const res = await fetch('https://smartbill-vqjf.onrender.com/api/complaints/my', {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await res.json();
@@ -113,7 +113,7 @@ window.fetchMyTickets = async () => {
 
 async function fetchSettings() {
     try {
-        const res = await fetch('http://localhost:3000/api/settings');
+        const res = await fetch('https://smartbill-vqjf.onrender.com/api/settings');
         const data = await res.json();
         if(data.success && data.data) {
             document.getElementById('contact-email').innerText = data.data.supportEmail || 'N/A';
@@ -127,7 +127,7 @@ async function fetchSettings() {
 
 async function fetchFounders() {
     try {
-        const res = await fetch('http://localhost:3000/api/founders');
+        const res = await fetch('https://smartbill-vqjf.onrender.com/api/founders');
         const data = await res.json();
         const list = document.getElementById('public-founders-list');
         

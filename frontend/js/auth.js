@@ -27,7 +27,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     const errObj = document.getElementById('login-error');
 
     try {
-        const res = await fetch('http://localhost:3000/api/auth/login', {
+        const res = await fetch('https://smartbill-vqjf.onrender.com/api/auth/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
@@ -60,7 +60,7 @@ document.getElementById('signup-form').addEventListener('submit', async (e) => {
     const errObj = document.getElementById('signup-error');
 
     try {
-        const res = await fetch('http://localhost:3000/api/auth/register', {
+        const res = await fetch('https://smartbill-vqjf.onrender.com/api/auth/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name, email, password })
@@ -86,7 +86,7 @@ document.getElementById('verify-otp-form').addEventListener('submit', async (e) 
     const errObj = document.getElementById('verify-otp-error');
 
     try {
-        const res = await fetch('http://localhost:3000/api/auth/verify-otp', {
+        const res = await fetch('https://smartbill-vqjf.onrender.com/api/auth/verify-otp', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: currentEmail, otp })
@@ -119,7 +119,7 @@ document.getElementById('forgot-email-form').addEventListener('submit', async (e
     errObj.innerText = 'Sending OTP...';
 
     try {
-        const res = await fetch('http://localhost:3000/api/auth/forgotpassword', {
+        const res = await fetch('https://smartbill-vqjf.onrender.com/api/auth/forgotpassword', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email })
@@ -147,7 +147,7 @@ document.getElementById('reset-password-form').addEventListener('submit', async 
     const errObj = document.getElementById('reset-password-error');
 
     try {
-        const res = await fetch('http://localhost:3000/api/auth/resetpassword', {
+        const res = await fetch('https://smartbill-vqjf.onrender.com/api/auth/resetpassword', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: resetEmailContext, otp, newPassword: password })

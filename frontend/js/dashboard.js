@@ -14,7 +14,7 @@ function logout() {
 }
 
 async function fetchAnalytics() {
-    const res = await fetch('http://localhost:3000/api/bills/analytics', {
+    const res = await fetch('https://smartbill-vqjf.onrender.com/api/bills/analytics', {
         headers: { 'Authorization': `Bearer ${token}` }
     });
     const { success, data } = await res.json();
@@ -27,7 +27,7 @@ async function fetchAnalytics() {
 }
 
 async function fetchNotifications() {
-    const res = await fetch('http://localhost:3000/api/notifications', {
+    const res = await fetch('https://smartbill-vqjf.onrender.com/api/notifications', {
         headers: { 'Authorization': `Bearer ${token}` }
     });
     const { success, data } = await res.json();
@@ -39,7 +39,7 @@ async function fetchNotifications() {
 
 async function fetchBills() {
     document.getElementById('loading').style.display = 'block';
-    const res = await fetch('http://localhost:3000/api/bills', {
+    const res = await fetch('https://smartbill-vqjf.onrender.com/api/bills', {
         headers: { 'Authorization': `Bearer ${token}` }
     });
     const { success, data } = await res.json();
@@ -101,7 +101,7 @@ document.getElementById('bill-form').addEventListener('submit', async (e) => {
         paymentLink: document.getElementById('bill-link').value
     };
 
-    const res = await fetch('http://localhost:3000/api/bills', {
+    const res = await fetch('https://smartbill-vqjf.onrender.com/api/bills', {
         method: 'POST',
         headers: { 
             'Content-Type': 'application/json',
@@ -133,7 +133,7 @@ function markPaymentAttempt() { }
 
 async function markAsPaidConfirm() {
     if(!currentPaymentBillId) return;
-    await fetch(`http://localhost:3000/api/bills/${currentPaymentBillId}`, {
+    await fetch(`https://smartbill-vqjf.onrender.com/api/bills/${currentPaymentBillId}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
@@ -148,7 +148,7 @@ async function markAsPaidConfirm() {
 async function deleteBill(id) {
     const isConfirmed = await customConfirm('Delete Bill', 'Are you sure you want to delete this bill?');
     if(isConfirmed) {
-        await fetch(`http://localhost:3000/api/bills/${id}`, {
+        await fetch(`https://smartbill-vqjf.onrender.com/api/bills/${id}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -157,7 +157,7 @@ async function deleteBill(id) {
 }
 
 function exportData(type) {
-    window.open(`http://localhost:3000/api/export/${type}?token=${token}`, '_blank');
+    window.open(`https://smartbill-vqjf.onrender.com/api/export/${type}?token=${token}`, '_blank');
 }
 
 function refreshAll() {
