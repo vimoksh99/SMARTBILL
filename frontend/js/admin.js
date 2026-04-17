@@ -203,7 +203,7 @@ function renderComplaints(complaints) {
         tr.innerHTML = `
             <td>${userName}</td>
             <td><strong>${c.subject}</strong></td>
-            <td style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${c.message}">${c.message}</td>
+            <td style="max-width: 300px; word-wrap: break-word; white-space: pre-wrap;">${c.message}</td>
             <td>${d}</td>
             <td>${statusBadge}</td>
             <td>${actionBtn}</td>

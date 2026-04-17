@@ -193,15 +193,44 @@
         flex-direction: row;
         align-items: center;
         justify-content: space-between;
+        flex-wrap: wrap;
+    }
+    .admin-brand {
+        margin-bottom: 1rem;
+        padding: 0;
+        width: 100%;
+        justify-content: center;
+        display: flex;
     }
     .sidebar-nav {
         flex-direction: row;
+        width: 100%;
+        overflow-x: auto;
+        padding-bottom: 0.5rem;
     }
-    .admin-brand {
-        margin-bottom: 0;
-        padding: 0;
+    .nav-item {
+        white-space: nowrap;
+        padding: 0.8rem 1rem;
     }
     .admin-footer {
-        padding: 0;
+        width: 100%;
+        padding: 1rem 0 0 0;
+    }
+    .admin-main {
+        padding: 1.5rem 1rem;
+    }
+    .admin-header {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem;
+        text-align: center;
+    }
+    .table-header-row {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    .admin-table-container {
+        overflow-x: auto;
     }
 }

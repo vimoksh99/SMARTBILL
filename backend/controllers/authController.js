@@ -55,23 +55,21 @@ exports.register = async (req, res, next) => {
         const otp = user.generateEmailOTP();
         await user.save();
         
-        try {
-            await sendEmail({
-                email: user.email,
-                subject: 'Verify your SmartBill Account',
-                message: `<h2>Welcome to SmartBill!</h2><p>Hi ${user.name}, please verify your account. Your OTP is: <strong>${otp}</strong></p>`
-            });
-            if (user.phone) {
-                await sendSMS({
-                    phone: user.phone,
-                    message: `Welcome to SmartBill, ${user.name}! Your verification OTP is ${otp}.`
-                });
-            }
-        } catch (mailErr) {
-            console.error('Failed to send verification messages', mailErr);
+        // Send OTPs asynchronously to prevent blocking the response
+        sendEmail({
+            email: user.email,
+            subject: 'Verify your SmartBill Account',
+            message: `<h2>Welcome to SmartBill!</h2><p>Hi ${user.name}, please verify your account. Your OTP is: <strong>${otp}</strong></p>`
+        }).catch(err => console.error('Failed to send verification email', err));
+
+        if (user.phone) {
+            sendSMS({
+                phone: user.phone,
+                message: `Welcome to SmartBill, ${user.name}! Your verification OTP is ${otp}.`
+            }).catch(err => console.error('Failed to send verification SMS', err));
         }
 
-        sendResponse(res, 200, true, 'OTP sent to email for verification');
+        sendResponse(res, 200, true, 'OTP sent for verification');
     } catch (err) {
         next(err);
     }
@@ -112,23 +110,21 @@ exports.login = async (req, res, next) => {
         const otp = user.generateEmailOTP();
         await user.save({ validateBeforeSave: false });
 
-        try {
-            await sendEmail({
-                email: user.email,
-                subject: 'Login OTP - SmartBill',
-                message: `<h2>Login Attempt</h2><p>Hi ${user.name}, your login OTP is: <strong>${otp}</strong></p>`
-            });
-            if (user.phone) {
-                await sendSMS({
-                    phone: user.phone,
-                    message: `SmartBill Login: Your OTP is ${otp}.`
-                });
-            }
-        } catch (mailErr) {
-            console.error('Failed to send login alert messages', mailErr);
+        // Send OTPs asynchronously
+        sendEmail({
+            email: user.email,
+            subject: 'Login OTP - SmartBill',
+            message: `<h2>Login Attempt</h2><p>Hi ${user.name}, your login OTP is: <strong>${otp}</strong></p>`
+        }).catch(err => console.error('Failed to send login alert email', err));
+
+        if (user.phone) {
+            sendSMS({
+                phone: user.phone,
+                message: `SmartBill Login: Your OTP is ${otp}.`
+            }).catch(err => console.error('Failed to send login alert SMS', err));
         }
 
-        sendResponse(res, 200, true, 'OTP sent to email for 2FA', { email: user.email });
+        sendResponse(res, 200, true, 'OTP sent for 2FA', { email: user.email });
     } catch (err) {
         next(err);
     }
@@ -208,27 +204,21 @@ exports.forgotPassword = async (req, res, next) => {
         const otp = user.getOTP();
         await user.save({ validateBeforeSave: false });
 
-        try {
-            await sendEmail({
-                email: user.email,
-                subject: 'Password Reset OTP - SmartBill',
-                message: `<h2>Password Reset Request</h2><p>Your 6-digit OTP is: <strong>${otp}</strong></p><p>It is valid for 10 minutes.</p>`
-            });
+        // Send OTPs asynchronously
+        sendEmail({
+            email: user.email,
+            subject: 'Password Reset OTP - SmartBill',
+            message: `<h2>Password Reset Request</h2><p>Your 6-digit OTP is: <strong>${otp}</strong></p><p>It is valid for 10 minutes.</p>`
+        }).catch(err => console.error('Failed to send forgot password email', err));
 
-            if (user.phone) {
-                await sendSMS({
-                    phone: user.phone,
-                    message: `Your SmartBill password reset OTP is ${otp}. Valid for 10 minutes.`
-                });
-            }
-
-            sendResponse(res, 200, true, 'OTP sent to email and phone');
-        } catch (err) {
-            user.resetToken = undefined;
-            user.resetTokenExpiry = undefined;
-            await user.save({ validateBeforeSave: false });
-            return sendResponse(res, 500, false, 'Email/SMS could not be sent');
+        if (user.phone) {
+            sendSMS({
+                phone: user.phone,
+                message: `Your SmartBill password reset OTP is ${otp}. Valid for 10 minutes.`
+            }).catch(err => console.error('Failed to send forgot password SMS', err));
         }
+
+        sendResponse(res, 200, true, 'OTP sent to email and phone');
     } catch (err) {
         next(err);
     }
