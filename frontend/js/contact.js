@@ -214,3 +214,14 @@ async function fetchFounders() {
 fetchMyTickets();
 fetchSettings();
 fetchFounders();
+
+// Poll auth status every 15 seconds to instantly catch admin block
+setInterval(async () => {
+    if (token) {
+        try {
+            await fetch('https://smartbill-vqjf.onrender.com/api/auth/me', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+        } catch (err) {}
+    }
+}, 15000);
