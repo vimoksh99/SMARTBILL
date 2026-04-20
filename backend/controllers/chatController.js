@@ -166,7 +166,11 @@ exports.handleChat = async (req, res, next) => {
             return sendResponse(res, 200, true, 'Chatbot reply', { reply: responseText });
         } catch (aiErr) {
             console.error('Gemini Error:', aiErr);
-            return sendResponse(res, 200, true, 'Chatbot reply', { reply: 'Sorry, I am having trouble connecting to my AI brain right now.' });
+            const errMsg = aiErr.message || '';
+            if (errMsg.includes('API key not valid') || errMsg.includes('not found')) {
+                return sendResponse(res, 200, true, 'Chatbot reply', { reply: 'Gemini AI is unable to respond because the provided API key is invalid or lacks access to the required Gemini models. Please check your GEMINI_API_KEY.' });
+            }
+            return sendResponse(res, 200, true, 'Chatbot reply', { reply: 'Sorry, I am having trouble connecting to my AI brain right now. ' + errMsg });
         }
 
     } catch (err) {
