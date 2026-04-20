@@ -12,7 +12,15 @@ window.fetch = async (...args) => {
     // 401/403 meaning Blocked or Deleted
     if (res.status === 401 || res.status === 403) {
         if (args[0] && String(args[0]).includes('/api/')) {
-            alert('Your account has been removed or blocked by the admin.');
+            const overlay = document.createElement('div');
+            overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:99999;display:flex;align-items:center;justify-content:center;';
+            overlay.innerHTML = '<div style="background:#1e1e2f;padding:2rem;border-radius:12px;text-align:center;color:white;max-width:400px;border:1px solid rgba(255,255,255,0.1);"><h3 style="margin-top:0;">Access Denied</h3><p style="color:#a0aec0;margin-bottom:1.5rem;">Your account has been removed or blocked by the admin.</p><button id="logout-alert-btn" style="background:#6366f1;color:white;border:none;padding:10px 24px;border-radius:8px;cursor:pointer;font-weight:bold;">Okay</button></div>';
+            document.body.appendChild(overlay);
+            
+            await new Promise(resolve => {
+                document.getElementById('logout-alert-btn').onclick = () => resolve();
+            });
+
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             window.location.href = './index.html';

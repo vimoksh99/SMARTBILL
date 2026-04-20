@@ -235,3 +235,51 @@
         overflow-x: auto;
     }
 }
+
+@media(max-width: 768px) {
+    .nav-item {
+        font-size: 0.95rem;
+        padding: 0.6rem 0.8rem;
+    }
+    .admin-main {
+        padding: 1rem 0.5rem;
+    }
+    .admin-header h1 {
+        font-size: 1.4rem;
+    }
+    .admin-table th, .admin-table td {
+        white-space: nowrap;
+        font-size: 0.85rem;
+        padding: 0.8rem 1rem;
+    }
+    .table-title {
+        font-size: 1.1rem;
+    }
+    .admin-header {
+        padding: 1rem;
+    }
+}
+
+@media(max-width: 480px) {
+    .sidebar-nav {
+        flex-direction: column;
+        overflow-x: hidden;
+    }
+    .nav-item {
+        width: 100%;
+        justify-content: center;
+        border-radius: 8px;
+    }
+    .admin-brand h2 {
+        font-size: 1.5rem;
+    }
+    .admin-logout {
+        padding: 0.8rem;
+        font-size: 0.9rem;
+    }
+    .status-badge {
+        font-size: 0.75rem;
+        padding: 4px 8px;
+        min-width: 60px;
+    }
+}
