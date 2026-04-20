@@ -1,6 +1,17 @@
 const nodemailer = require('nodemailer');
+const User = require('../models/User');
 
 const sendEmail = async (options) => {
+    try {
+        const user = await User.findOne({ email: options.email });
+        if (user && user.role === 'admin') {
+            console.log(`[EMAIL BLOCKED] Admin account ${options.email} bypassed email sending.`);
+            return;
+        }
+    } catch (err) {
+        console.error('Error checking admin for email:', err);
+    }
+
     // If no credentials, just mock the console output
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
         console.log(`[MOCK EMAIL] To: ${options.email}, Subject: ${options.subject}`);
