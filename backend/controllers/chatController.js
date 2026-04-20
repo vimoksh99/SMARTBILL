@@ -138,10 +138,15 @@ exports.handleChat = async (req, res, next) => {
         }
 
         try {
-            const { GoogleGenAI } = require('@google/genai');
-            const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+            const { GoogleGenerativeAI } = require('@google/generative-ai');
+            const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
             
-            const parts = [{ text: message || "Analyze this image for me." }];
+            const model = genAI.getGenerativeModel({
+                model: 'gemini-1.5-flash',
+                systemInstruction: 'You are the SmartBill assistant. You can help users manage their bills, analyze images of invoices to read details, and answer general financial or loan-related questions. Keep responses concise, friendly, and easy to read.'
+            });
+            
+            let parts = [message || "Analyze this image for me."];
             
             if (image) {
                 const matches = image.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
@@ -155,15 +160,10 @@ exports.handleChat = async (req, res, next) => {
                 }
             }
 
-            const response = await ai.models.generateContent({
-                model: 'gemini-2.5-flash',
-                contents: [{ role: 'user', parts }],
-                config: {
-                    systemInstruction: 'You are the SmartBill assistant. You can help users manage their bills, analyze images of invoices to read details, and answer general financial or loan-related questions. Keep responses concise, friendly, and easy to read.'
-                }
-            });
+            const result = await model.generateContent(parts);
+            const responseText = result.response.text();
 
-            return sendResponse(res, 200, true, 'Chatbot reply', { reply: response.text });
+            return sendResponse(res, 200, true, 'Chatbot reply', { reply: responseText });
         } catch (aiErr) {
             console.error('Gemini Error:', aiErr);
             return sendResponse(res, 200, true, 'Chatbot reply', { reply: 'Sorry, I am having trouble connecting to my AI brain right now.' });
