@@ -142,7 +142,7 @@ exports.handleChat = async (req, res, next) => {
             const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
             
             const model = genAI.getGenerativeModel({
-                model: 'gemini-2.0-flash',
+                model: 'gemini-flash-latest',
                 systemInstruction: 'You are the SmartBill assistant. You can help users manage their bills, analyze images of invoices to read details, and answer general financial or loan-related questions. Keep responses concise, friendly, and easy to read.'
             });
             
