@@ -56,6 +56,27 @@ function handleEnter(e) {
     }
 }
 
+let currentChatImageBase64 = null;
+
+function previewChatImage(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        currentChatImageBase64 = e.target.result; // Data URL
+        document.getElementById('chat-preview-img').src = currentChatImageBase64;
+        document.getElementById('chat-image-preview').style.display = 'flex';
+    };
+    reader.readAsDataURL(file);
+}
+
+function removeChatImage() {
+    currentChatImageBase64 = null;
+    document.getElementById('chat-image-input').value = '';
+    document.getElementById('chat-image-preview').style.display = 'none';
+}
+
 async function sendChatMsg(text) {
     appendMessage(text, 'user');
     await sendChatMsgAPI(text);
@@ -63,6 +84,13 @@ async function sendChatMsg(text) {
 
 async function sendChatMsgAPI(text) {
     showTyping();
+    const payload = { message: text };
+    
+    if (currentChatImageBase64) {
+        payload.image = currentChatImageBase64;
+        removeChatImage(); // clear after sending
+    }
+
     try {
         const res = await fetch('https://smartbill-vqjf.onrender.com/api/chat', {
             method: 'POST',
@@ -70,7 +98,7 @@ async function sendChatMsgAPI(text) {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
-            body: JSON.stringify({ message: text })
+            body: JSON.stringify(payload)
         });
         const data = await res.json();
 

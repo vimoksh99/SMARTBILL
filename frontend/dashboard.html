@@ -95,7 +95,13 @@
                 <button class="chip" onclick="sendChatMsg('Show my bills')">View Bills</button>
                 <button class="chip" onclick="sendChatMsg('Show upcoming')">Upcoming</button>
             </div>
-            <div class="chat-input-area">
+            <div class="chat-input-area" style="flex-wrap: wrap;">
+                <div id="chat-image-preview" style="display: none; width: 100%; margin-bottom: 8px; flex-basis: 100%; align-items: center; gap: 10px;">
+                    <img id="chat-preview-img" src="" style="max-height: 60px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2);">
+                    <button onclick="removeChatImage()" style="background: rgba(239, 68, 68, 0.2); border: none; color: var(--danger); cursor: pointer; padding: 4px 8px; border-radius: 50%; font-size: 0.8rem;">✕</button>
+                </div>
+                <button onclick="document.getElementById('chat-image-input').click()" class="chat-attach-btn" title="Upload Image">📎</button>
+                <input type="file" id="chat-image-input" accept="image/*" style="display: none;" onchange="previewChatImage(event)">
                 <input type="text" id="chat-input" placeholder="Type a message..." onkeypress="handleEnter(event)">
                 <button onclick="sendUserMsg()">Send</button>
             </div>

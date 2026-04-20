@@ -25,7 +25,7 @@ const detectIntent = (text) => {
 // @access  Private
 exports.handleChat = async (req, res, next) => {
     try {
-        const { message } = req.body;
+        const { message, image } = req.body;
         const userId = req.user.id;
 
         if (!message) {
@@ -103,34 +103,71 @@ exports.handleChat = async (req, res, next) => {
         }
 
         // -- INTENT DETECTION (IDLE STATE) --
-        const intent = detectIntent(message);
+        // If image exists, skip simple text intents and ask Gemini
+        if (!image) {
+            const intent = detectIntent(message);
 
-        if (intent === 'ADD_BILL') {
-            state.step = 'AWAIT_BILL_NAME';
-            setChatState(userId, state);
-            return sendResponse(res, 200, true, 'Chatbot reply', { reply: 'Let\'s add a new bill! What is the name of the bill?' });
-        }
-
-        if (intent === 'VIEW_BILLS') {
-            const count = await Bill.countDocuments({ userId });
-            return sendResponse(res, 200, true, 'Chatbot reply', { reply: `You currently have ${count} bills tracked. Check the dashboard list for details!`, action: 'view_dashboard' });
-        }
-
-        if (intent === 'UPCOMING') {
-            const upcoming = await Bill.find({ userId, status: 'pending', dueDate: { $gte: new Date() } }).sort('dueDate').limit(3);
-            if (upcoming.length === 0) {
-                return sendResponse(res, 200, true, 'Chatbot reply', { reply: `You have no upcoming bills! Relax.` });
+            if (intent === 'ADD_BILL') {
+                state.step = 'AWAIT_BILL_NAME';
+                setChatState(userId, state);
+                return sendResponse(res, 200, true, 'Chatbot reply', { reply: 'Let\'s add a new bill! What is the name of the bill?' });
             }
-            let replyText = "Here are your next bills:\n" + upcoming.map(b => `- ${b.billName}: ₹${b.amount} due on ${b.dueDate.toISOString().split('T')[0]}`).join('\n');
-            return sendResponse(res, 200, true, 'Chatbot reply', { reply: replyText });
+
+            if (intent === 'VIEW_BILLS') {
+                const count = await Bill.countDocuments({ userId });
+                return sendResponse(res, 200, true, 'Chatbot reply', { reply: `You currently have ${count} bills tracked. Check the dashboard list for details!`, action: 'view_dashboard' });
+            }
+
+            if (intent === 'UPCOMING') {
+                const upcoming = await Bill.find({ userId, status: 'pending', dueDate: { $gte: new Date() } }).sort('dueDate').limit(3);
+                if (upcoming.length === 0) {
+                    return sendResponse(res, 200, true, 'Chatbot reply', { reply: `You have no upcoming bills! Relax.` });
+                }
+                let replyText = "Here are your next bills:\n" + upcoming.map(b => `- ${b.billName}: ₹${b.amount} due on ${b.dueDate.toISOString().split('T')[0]}`).join('\n');
+                return sendResponse(res, 200, true, 'Chatbot reply', { reply: replyText });
+            }
+
+            if (intent === 'HELP') {
+                return sendResponse(res, 200, true, 'Chatbot reply', { reply: `I can help you manage your bills. Try saying:\n- "Add a bill"\n- "Show my bills"\n- "Show upcoming"` });
+            }
         }
 
-        if (intent === 'HELP') {
-            return sendResponse(res, 200, true, 'Chatbot reply', { reply: `I can help you manage your bills. Try saying:\n- "Add a bill"\n- "Show my bills"\n- "Show upcoming"` });
+        // -- AI FALLBACK (GenAI) --
+        if (!process.env.GEMINI_API_KEY) {
+            return sendResponse(res, 200, true, 'Chatbot reply', { reply: `I didn't quite catch that. (Gemini AI not configured in .env)` });
         }
 
-        // Fallback
-        return sendResponse(res, 200, true, 'Chatbot reply', { reply: `I didn't quite catch that. You can say "Help" to see what I can do.` });
+        try {
+            const { GoogleGenAI } = require('@google/genai');
+            const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+            
+            const parts = [{ text: message || "Analyze this image for me." }];
+            
+            if (image) {
+                const matches = image.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+                if (matches && matches.length === 3) {
+                    parts.push({
+                        inlineData: {
+                            mimeType: matches[1],
+                            data: matches[2]
+                        }
+                    });
+                }
+            }
+
+            const response = await ai.models.generateContent({
+                model: 'gemini-2.5-flash',
+                contents: [{ role: 'user', parts }],
+                config: {
+                    systemInstruction: 'You are the SmartBill assistant. You can help users manage their bills, analyze images of invoices to read details, and answer general financial or loan-related questions. Keep responses concise, friendly, and easy to read.'
+                }
+            });
+
+            return sendResponse(res, 200, true, 'Chatbot reply', { reply: response.text });
+        } catch (aiErr) {
+            console.error('Gemini Error:', aiErr);
+            return sendResponse(res, 200, true, 'Chatbot reply', { reply: 'Sorry, I am having trouble connecting to my AI brain right now.' });
+        }
 
     } catch (err) {
         next(err);

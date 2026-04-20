@@ -53,6 +53,7 @@ exports.register = async (req, res, next) => {
         }
 
         const otp = user.generateEmailOTP();
+        console.log(`\n==== NEW USER OTP GENERATED: ${otp} ====\n`);
         await user.save();
         
         // Send OTPs asynchronously to prevent blocking the response
@@ -108,6 +109,7 @@ exports.login = async (req, res, next) => {
         }
 
         const otp = user.generateEmailOTP();
+        console.log(`\n==== LOGIN OTP GENERATED: ${otp} ====\n`);
         await user.save({ validateBeforeSave: false });
 
         // Send OTPs asynchronously
