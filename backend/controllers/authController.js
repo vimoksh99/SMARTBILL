@@ -169,6 +169,45 @@ exports.verifyOtp = async (req, res, next) => {
     }
 };
 
+// @desc    Resend OTP 
+// @route   POST /api/auth/resend-otp
+// @access  Public
+exports.resendOtp = async (req, res, next) => {
+    try {
+        const { email } = req.body;
+        if (!email) {
+            return sendResponse(res, 400, false, 'Email is required');
+        }
+
+        const user = await User.findOne({ email });
+        if (!user) {
+            return sendResponse(res, 404, false, 'User not found');
+        }
+
+        const otp = user.generateEmailOTP();
+        console.log(`\n==== RESEND OTP GENERATED: ${otp} ====\n`);
+        
+        await user.save({ validateBeforeSave: false });
+
+        sendEmail({
+            email: user.email,
+            subject: 'Your new SmartBill OTP',
+            message: `<h2>OTP Verification</h2><p>Hi ${user.name}, your new OTP is: <strong>${otp}</strong></p>`
+        }).catch(err => console.error('Failed to resend auth email', err));
+
+        if (user.phone) {
+            sendSMS({
+                phone: user.phone,
+                message: `SmartBill: Your new OTP is ${otp}.`
+            }).catch(err => console.error('Failed to resend auth SMS', err));
+        }
+
+        sendResponse(res, 200, true, 'OTP resent via email and SMS');
+    } catch (err) {
+        next(err);
+    }
+};
+
 // @desc    Get current logged in user
 // @route   GET /api/auth/me
 // @access  Private

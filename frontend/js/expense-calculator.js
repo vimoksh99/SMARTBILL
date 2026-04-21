@@ -79,6 +79,33 @@ function initApp() {
     initChart();
     updateDashboard();
     setupEventListeners();
+    fetchAnalyticsData();
+}
+
+async function fetchAnalyticsData() {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    try {
+        const res = await fetch('https://smartbill-vqjf.onrender.com/api/bills/analytics', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const { success, data } = await res.json();
+        
+        if (success && data.categoryBreakdown) {
+            data.categoryBreakdown.forEach(apiCat => {
+                const localCat = categories.find(c => c.name.toLowerCase() === apiCat.category.toLowerCase());
+                if (localCat) {
+                    localCat.value = apiCat.total;
+                    const index = categories.indexOf(localCat);
+                    const inputEl = document.getElementById(`input-${index}`);
+                    if (inputEl) inputEl.value = apiCat.total;
+                }
+            });
+            updateDashboard();
+        }
+    } catch(err) {
+        console.error("Failed to fetch bill analytics", err);
+    }
 }
 
 function renderSlides() {

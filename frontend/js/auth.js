@@ -109,6 +109,40 @@ document.getElementById('verify-otp-form').addEventListener('submit', async (e) 
     }
 });
 
+async function resendOTP() {
+    if (!currentEmail) return;
+    const resendLink = document.getElementById('resend-otp-link');
+    const errObj = document.getElementById('verify-otp-error');
+    
+    resendLink.innerText = 'Sending...';
+    resendLink.style.pointerEvents = 'none';
+    errObj.style.color = '#333';
+    errObj.innerText = '';
+    
+    try {
+        const res = await fetch('https://smartbill-vqjf.onrender.com/api/auth/resend-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: currentEmail })
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+            errObj.style.color = 'var(--accent-color)';
+            errObj.innerText = 'OTP successfully resent!';
+        } else {
+            errObj.style.color = 'var(--danger)';
+            errObj.innerText = data.message || 'Failed to resend';
+        }
+    } catch(err) {
+        errObj.style.color = 'var(--danger)';
+        errObj.innerText = 'Server error';
+    } finally {
+        resendLink.innerText = 'Resend OTP';
+        resendLink.style.pointerEvents = 'auto';
+    }
+}
+
 // Forgot Password Request OTP
 let resetEmailContext = '';
 document.getElementById('forgot-email-form').addEventListener('submit', async (e) => {

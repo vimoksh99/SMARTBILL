@@ -68,8 +68,9 @@
                 <input type="text" id="verify-otp-input" required placeholder="123456" pattern="[0-9]{6}">
             </div>
             <button type="submit" class="primary-btn submit-btn">Verify & Proceed</button>
-            <div style="text-align: center; margin-top: 15px;">
+            <div style="text-align: center; margin-top: 15px; display: flex; justify-content: space-between; padding: 0 10px;">
                 <a href="#" onclick="switchTab('login')" style="color: #666; font-size: 0.9rem; text-decoration: none;">Cancel</a>
+                <a href="#" onclick="resendOTP()" style="color: var(--primary-color); font-size: 0.9rem; text-decoration: none; font-weight: 600;" id="resend-otp-link">Resend OTP</a>
             </div>
             <div class="error-msg" id="verify-otp-error"></div>
         </form>
