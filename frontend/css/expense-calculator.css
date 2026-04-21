@@ -113,6 +113,8 @@ body {
     font-size: 2rem;
     font-weight: 600;
     color: var(--text-main);
+    word-break: break-all;
+    overflow-wrap: break-word;
 }
 
 .total-expense .card-value {
