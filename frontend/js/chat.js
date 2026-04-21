@@ -102,21 +102,19 @@ async function sendChatMsgAPI(text) {
         });
         const data = await res.json();
 
-        setTimeout(() => {
-            removeTyping();
-            if (data.success) {
-                appendMessage(data.data.reply, 'bot');
-                
-                // Handle actions triggered by bot
-                if (data.data.action === 'refresh_bills') {
-                    if (typeof refreshAll === 'function') refreshAll();
-                } else if (data.data.action === 'view_dashboard') {
-                    // Do nothing or visual cue
-                }
-            } else {
-                appendMessage("Error communicating with server.", 'bot');
+        removeTyping();
+        if (data.success) {
+            appendMessage(data.data.reply, 'bot');
+            
+            // Handle actions triggered by bot
+            if (data.data.action === 'refresh_bills') {
+                if (typeof refreshAll === 'function') refreshAll();
+            } else if (data.data.action === 'view_dashboard') {
+                // Do nothing or visual cue
             }
-        }, 800); // Simulate network/typing delay
+        } else {
+            appendMessage("Error communicating with server.", 'bot');
+        }
     } catch (err) {
         removeTyping();
         appendMessage("Network error.", 'bot');
