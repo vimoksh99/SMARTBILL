@@ -61,16 +61,37 @@ exports.handleChat = async (req, res, next) => {
             }
 
             if (state.step === 'AWAIT_BILL_DUE_DATE') {
-                // simple date parsing
-                let d = new Date(message);
-                if (message.toLowerCase() === 'tomorrow') {
-                    d = new Date(); d.setDate(d.getDate() + 1);
+                let text = message.toLowerCase().trim();
+                let d = new Date(text);
+                let isRecurring = text.includes('every') || text.includes('month');
+
+                // Check for 'tomorrow' and 'today' first
+                if (text === 'tomorrow') {
+                    d = new Date(); d.setDate(d.getDate() + 1); d.setHours(0,0,0,0);
+                } else if (text === 'today') {
+                    d = new Date(); d.setHours(0,0,0,0);
+                } else if (isNaN(d.getTime()) || isRecurring) {
+                    // Try to find a standalone day number between 1 and 31
+                    const dayMatch = text.match(/\b([1-9]|[12][0-9]|3[01])\s*(?:st|nd|rd|th)?\b/i);
+                    if (dayMatch) {
+                        const day = parseInt(dayMatch[1], 10);
+                        d = new Date();
+                        if (d.getDate() > day) {
+                            d.setMonth(d.getMonth() + 1);
+                        }
+                        d.setDate(day);
+                        d.setHours(0,0,0,0);
+                    }
                 }
                 
-                if (isNaN(d.getTime())) {
-                    return sendResponse(res, 200, true, 'Chatbot reply', { reply: "I couldn't parse that date. Please use YYYY-MM-DD format." });
+                if (!d || isNaN(d.getTime())) {
+                    return sendResponse(res, 200, true, 'Chatbot reply', { reply: "I couldn't parse that date. Please try something like 'YYYY-MM-DD', 'tomorrow', '15th', or 'every month 1st'." });
                 }
+
                 state.data.dueDate = d;
+                if (isRecurring) {
+                    state.data.reminderType = 'recurring';
+                }
                 state.step = 'AWAIT_BILL_LINK';
                 setChatState(userId, state);
                 return sendResponse(res, 200, true, 'Chatbot reply', { reply: `Noted. Do you have a payment link? (Paste URL or say 'none')` });
@@ -142,7 +163,7 @@ exports.handleChat = async (req, res, next) => {
             const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
             
             const model = genAI.getGenerativeModel({
-                model: 'gemini-flash-latest',
+                model: 'gemini-1.5-flash',
                 systemInstruction: 'You are the SmartBill assistant. You can help users manage their bills, analyze images of invoices to read details, and answer general financial or loan-related questions. Keep responses concise, friendly, and easy to read.'
             });
             
