@@ -102,6 +102,7 @@
                 </div>
                 <button onclick="document.getElementById('chat-image-input').click()" class="chat-attach-btn" title="Upload Image">📎</button>
                 <input type="file" id="chat-image-input" accept="image/*" style="display: none;" onchange="previewChatImage(event)">
+                <button id="mic-btn" class="chat-voice-btn" title="Hold to Speak" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-color);">🎙️</button>
                 <input type="text" id="chat-input" placeholder="Type a message..." onkeypress="handleEnter(event)">
                 <button onclick="sendUserMsg()">Send</button>
             </div>
@@ -171,6 +172,9 @@
             </div>
         </div>
     </div>
+
+    <!-- Gamification Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <script src="js/dashboard.js"></script>
     <script src="js/chat.js"></script>

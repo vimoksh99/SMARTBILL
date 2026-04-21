@@ -76,6 +76,8 @@ async function fetchStats() {
     }
 }
 
+let allAdminUsers = [];
+
 async function fetchUsers() {
     try {
         const res = await fetch('https://smartbill-vqjf.onrender.com/api/admin/users', {
@@ -83,11 +85,24 @@ async function fetchUsers() {
         });
         const data = await res.json();
         if (data.success) {
-            renderUsers(data.data);
+            allAdminUsers = data.data;
+            renderUsers(allAdminUsers);
         }
     } catch (err) {
         console.error('Error fetching users', err);
     }
+}
+
+const searchMembersInput = document.getElementById('search-members');
+if (searchMembersInput) {
+    searchMembersInput.addEventListener('input', (e) => {
+        const q = e.target.value.toLowerCase();
+        const filtered = allAdminUsers.filter(u => 
+            u.name.toLowerCase().includes(q) || 
+            u.email.toLowerCase().includes(q)
+        );
+        renderUsers(filtered);
+    });
 }
 
 function renderUsers(users) {

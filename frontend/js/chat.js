@@ -3,6 +3,44 @@ const chatWindow = document.getElementById('chat-window');
 const closeChat = document.getElementById('close-chat');
 const chatHistory = document.getElementById('chat-history');
 const chatInput = document.getElementById('chat-input');
+const micBtn = document.getElementById('mic-btn');
+
+// Speech Recognition System
+window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+let isRecording = false;
+
+if (window.SpeechRecognition && micBtn) {
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    micBtn.addEventListener('click', () => {
+        if(isRecording) {
+            recognition.stop();
+            return;
+        }
+        try {
+            recognition.start();
+            isRecording = true;
+            micBtn.style.transform = 'scale(1.2)';
+            micBtn.innerText = '🔴';
+        } catch(e) {}
+    });
+
+    recognition.onresult = (e) => {
+        const text = e.results[0][0].transcript;
+        chatInput.value = text;
+        sendUserMsg();
+    };
+
+    recognition.onend = () => {
+        isRecording = false;
+        micBtn.style.transform = 'scale(1)';
+        micBtn.innerText = '🎙️';
+    };
+} else if (micBtn) {
+    micBtn.style.display = 'none';
+}
 
 chatToggle.addEventListener('click', () => {
     chatWindow.style.display = 'flex';
@@ -109,6 +147,16 @@ async function sendChatMsgAPI(text) {
             // Handle actions triggered by bot
             if (data.data.action === 'refresh_bills') {
                 if (typeof refreshAll === 'function') refreshAll();
+                
+                // Gamification: Fire confetti on successful bill add
+                if (typeof confetti === 'function') {
+                    confetti({
+                        particleCount: 150,
+                        spread: 80,
+                        origin: { y: 0.6 }
+                    });
+                }
+                
             } else if (data.data.action === 'view_dashboard') {
                 // Do nothing or visual cue
             }
