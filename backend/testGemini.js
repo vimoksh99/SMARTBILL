@@ -4,8 +4,7 @@ require('dotenv').config({ path: './.env' });
 async function test() {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({
-        model: 'gemini-flash-latest',
-        tools: [{ googleSearch: {} }]
+        model: 'gemini-flash-latest'
     });
 
     try {
