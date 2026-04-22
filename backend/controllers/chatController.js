@@ -164,7 +164,8 @@ exports.handleChat = async (req, res, next) => {
             
             const model = genAI.getGenerativeModel({
                 model: 'gemini-flash-latest',
-                systemInstruction: 'You are the SmartBill assistant. You can help users manage their bills, analyze images of invoices to read details, and answer general financial or loan-related questions. Keep responses concise, friendly, and easy to read.'
+                systemInstruction: 'You are the SmartBill assistant. You can help users manage their bills, analyze images of invoices to read details, and answer general financial or loan-related questions. Note for recent sports facts: Urvil Patel is currently playing for CSK (Chennai Super Kings), though he previously played for RR. Keep responses concise, friendly, and easy to read.',
+                tools: [{ googleSearch: {} }]
             });
             
             let parts = [message || "Analyze this image for me."];
