@@ -163,7 +163,7 @@ exports.handleChat = async (req, res, next) => {
             const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
             
             const model = genAI.getGenerativeModel({
-                model: 'gemini-1.5-flash',
+                model: 'gemini-1.5-pro',
                 systemInstruction: 'You are the SmartBill assistant. You can help users manage their bills, analyze images of invoices to read details, and answer general financial or loan-related questions. Note for recent sports facts: Urvil Patel is currently playing for CSK (Chennai Super Kings), though he previously played for RR. Keep responses concise, friendly, and easy to read.'
             });
             
@@ -181,7 +181,25 @@ exports.handleChat = async (req, res, next) => {
                 }
             }
 
-            const result = await model.generateContent(parts);
+            const generateWithRetry = async (parts, maxRetries = 3) => {
+                for (let i = 0; i < maxRetries; i++) {
+                    try {
+                        return await model.generateContent(parts);
+                    } catch (error) {
+                        const errMsg = error.message || '';
+                        if (errMsg.includes('503') || errMsg.includes('Service Unavailable') || errMsg.includes('overloaded')) {
+                            if (i === maxRetries - 1) throw error;
+                            const delay = Math.pow(2, i) * 1000 + Math.random() * 1000; // Exponential backoff with jitter
+                            console.log(`[Gemini API] 503 error encountered, retrying in ${Math.round(delay)}ms... (Attempt ${i + 1}/${maxRetries - 1})`);
+                            await new Promise(resolve => setTimeout(resolve, delay));
+                        } else {
+                            throw error;
+                        }
+                    }
+                }
+            };
+
+            const result = await generateWithRetry(parts);
             const responseText = result.response.text();
 
             return sendResponse(res, 200, true, 'Chatbot reply', { reply: responseText });
