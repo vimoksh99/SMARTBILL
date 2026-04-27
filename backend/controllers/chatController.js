@@ -173,11 +173,11 @@ exports.handleChat = async (req, res, next) => {
                     const { data: newsData } = await axios.get(`https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=en-IN&gl=IN&ceid=IN:en`);
                     const $ = cheerio.load(newsData, { xmlMode: true });
                     let newsItems = [];
-                    $('item').slice(0, 3).each((i, el) => {
-                        newsItems.push($(el).find('title').text());
+                    $('item').slice(0, 5).each((i, el) => {
+                        newsItems.push(`- ` + $(el).find('title').text());
                     });
                     if (newsItems.length) {
-                        context += "Live Headlines:\n" + newsItems.join('\n') + "\n\n";
+                        context += "LIVE NEWS HEADLINES:\n" + newsItems.join('\n') + "\n\n";
                     }
                 } catch (e) {
                     console.error("News fetch failed", e.message);
@@ -189,8 +189,8 @@ exports.handleChat = async (req, res, next) => {
                         headers: { 'User-Agent': 'SmartBillChatbot/1.0 (https://github.com/my-smartbill)' }
                     });
                     if (wikiData && wikiData.query && wikiData.query.search && wikiData.query.search.length > 0) {
-                        let results = wikiData.query.search.slice(0, 2).map(r => r.snippet.replace(/<\/?[^>]+(>|$)/g, ""));
-                        context += "Wiki Facts:\n" + results.join('\n');
+                        let results = wikiData.query.search.slice(0, 3).map(r => r.snippet.replace(/<\/?[^>]+(>|$)/g, ""));
+                        context += "WIKIPEDIA FACTS:\n- " + results.join('\n- ');
                     }
                 } catch (e) {
                     console.error("Wiki fetch failed", e.message);
@@ -204,13 +204,17 @@ exports.handleChat = async (req, res, next) => {
                 wikiContext = await searchWeb(message);
             }
 
-            const systemInstruction = `You are the SmartBill assistant. You can help users manage their bills, analyze images of invoices to read details, and answer general financial or loan-related questions. Keep responses concise, friendly, and easy to read. Note for recent sports facts: Urvil Patel is currently playing for CSK (Chennai Super Kings), though he previously played for RR.
-            
-            Here is real-time context fetched from the web:
-            ---
-            ${wikiContext || "No specific real-time context found."}
-            ---
-            Use this context to accurately answer the user's questions about current events, sports, facts, etc.`;
+            const systemInstruction = `You are the SmartBill assistant. You can help users manage their bills, analyze images of invoices, and answer general questions.
+
+CRITICAL INSTRUCTION:
+You DO have real-time information. Your knowledge cutoff does not matter because live search results are injected into your prompt. Do not EVER say you lack real-time info. Do not roleplay searching the web. 
+
+Here is the exact live web context for the user's query:
+---
+${wikiContext || "No specific real-time context found."}
+---
+
+If the user asks about sports, news, or facts, you MUST use the live headlines/facts above to construct your answer. Confidently synthesize the data (e.g., if a headline says X beat Y, then inform the user X beat Y). Do not complain about limited data. Keep responses concise, natural, and helpful.`;
 
             let messages = [
                 { role: 'system', content: systemInstruction }
