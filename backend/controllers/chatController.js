@@ -216,13 +216,31 @@ exports.handleChat = async (req, res, next) => {
                             temperature: 0.7,
                             max_completion_tokens: 1024,
                         };
-                        if (includeTools && !image) {
-                            payload.tools = tools;
-                            payload.tool_choice = "auto";
+                        
+                        // Only add tools if it's not an image request
+                        if (!image) {
+                            const hasToolMessages = messagesArray.some(m => m.role === 'tool' || m.tool_calls);
+                            // We include tools if requested OR if there are existing tool messages in history (OpenAI requirement)
+                            if (includeTools || hasToolMessages) {
+                                payload.tools = tools;
+                                payload.tool_choice = includeTools ? "auto" : "none";
+                            }
                         }
                         return await groq.chat.completions.create(payload);
                     } catch (error) {
                         const errMsg = error.message || '';
+                        
+                        // Handle Groq specific tool parsing failures or generic 400 bad requests caused by tools
+                        // We also catch generic 400 because sometimes Groq bundles tool failures as generic 400s
+                        if (errMsg.includes('tool_use_failed') || errMsg.includes('Failed to call a function') || errMsg.includes('400')) {
+                            console.warn('[Groq API] Tool execution or validation failed, skipping tools entirely to salvage request:', errMsg);
+                            if (includeTools) {
+                                // Strip tools completely and try again to get a plain reply
+                                return await generateWithRetry(messagesArray, false, 1);
+                            }
+                            throw error; // If it fails even without tools, bubble up
+                        }
+                        
                         if (errMsg.includes('503') || errMsg.includes('Service Unavailable') || errMsg.includes('overloaded') || errMsg.includes('429')) {
                             if (i === maxRetries - 1) throw error;
                             const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
@@ -250,7 +268,7 @@ exports.handleChat = async (req, res, next) => {
                 }
             };
 
-            let response = await generateWithRetry(messages);
+            let response = await generateWithRetry(messages, true);
             let responseMessage = response.choices[0]?.message;
 
             // Handle tool calls if LLaMA model decides to search
@@ -258,8 +276,14 @@ exports.handleChat = async (req, res, next) => {
                 messages.push(responseMessage);
                 for (const toolCall of responseMessage.tool_calls) {
                     if (toolCall.function.name === 'search_web') {
-                        const args = JSON.parse(toolCall.function.arguments);
-                        const searchResults = await searchWeb(args.query);
+                        let args = { query: '' };
+                        try {
+                            args = JSON.parse(toolCall.function.arguments);
+                        } catch(e) {
+                            console.warn("Failed to parse tool arguments:", toolCall.function.arguments);
+                        }
+                        
+                        const searchResults = await searchWeb(args.query || 'unknown');
                         messages.push({
                             tool_call_id: toolCall.id,
                             role: "tool",
