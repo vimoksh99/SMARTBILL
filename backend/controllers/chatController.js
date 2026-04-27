@@ -164,20 +164,39 @@ exports.handleChat = async (req, res, next) => {
             const axios = require('axios');
             const cheerio = require('cheerio');
             
-            // 1. Pre-fetch real-time context using Wikipedia (RAG Pattern)
+            // 1. Pre-fetch real-time context using Google News RSS & Wikipedia (RAG Pattern)
             const searchWeb = async (query) => {
+                let context = "";
+                
+                // Fetch live news headlines for current events (like 'yesterday's match')
                 try {
-                    const { data } = await axios.get(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&utf8=&format=json`, {
+                    const { data: newsData } = await axios.get(`https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=en-IN&gl=IN&ceid=IN:en`);
+                    const $ = cheerio.load(newsData, { xmlMode: true });
+                    let newsItems = [];
+                    $('item').slice(0, 3).each((i, el) => {
+                        newsItems.push($(el).find('title').text());
+                    });
+                    if (newsItems.length) {
+                        context += "Live Headlines:\n" + newsItems.join('\n') + "\n\n";
+                    }
+                } catch (e) {
+                    console.error("News fetch failed", e.message);
+                }
+
+                // Fetch encyclopedic facts from Wikipedia
+                try {
+                    const { data: wikiData } = await axios.get(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&utf8=&format=json`, {
                         headers: { 'User-Agent': 'SmartBillChatbot/1.0 (https://github.com/my-smartbill)' }
                     });
-                    if (data && data.query && data.query.search) {
-                        let results = data.query.search.slice(0, 3).map(r => r.snippet.replace(/<\/?[^>]+(>|$)/g, ""));
-                        return results.length ? results.join('\n') : "";
+                    if (wikiData && wikiData.query && wikiData.query.search && wikiData.query.search.length > 0) {
+                        let results = wikiData.query.search.slice(0, 2).map(r => r.snippet.replace(/<\/?[^>]+(>|$)/g, ""));
+                        context += "Wiki Facts:\n" + results.join('\n');
                     }
-                    return "";
                 } catch (e) {
-                    return "";
+                    console.error("Wiki fetch failed", e.message);
                 }
+                
+                return context;
             };
 
             let wikiContext = "";
