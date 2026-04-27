@@ -154,43 +154,79 @@ exports.handleChat = async (req, res, next) => {
         }
 
         // -- AI FALLBACK (GenAI) --
-        if (!process.env.GEMINI_API_KEY) {
-            return sendResponse(res, 200, true, 'Chatbot reply', { reply: `I didn't quite catch that. (Gemini AI not configured in .env)` });
+        if (!process.env.GROQ_API_KEY) {
+            return sendResponse(res, 200, true, 'Chatbot reply', { reply: `I didn't quite catch that. (Groq AI not configured in .env)` });
         }
 
         try {
-            const { GoogleGenerativeAI } = require('@google/generative-ai');
-            const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+            const Groq = require('groq-sdk');
+            const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+            const axios = require('axios');
+            const cheerio = require('cheerio');
             
-            const model = genAI.getGenerativeModel({
-                model: 'gemini-flash-lite-latest',
-                systemInstruction: 'You are the SmartBill assistant. You can help users manage their bills, analyze images of invoices to read details, and answer general financial or loan-related questions. Note for recent sports facts: Urvil Patel is currently playing for CSK (Chennai Super Kings), though he previously played for RR. Keep responses concise, friendly, and easy to read.'
-            });
+            const systemInstruction = 'You are the SmartBill assistant. You can help users manage their bills, analyze images of invoices to read details, and answer general financial or loan-related questions. You have access to the search_web tool to look up real-time information. Use it whenever a user asks about current events, live stats, facts, or anything requiring real-time knowledge. Keep responses concise, friendly, and easy to read.';
             
-            let parts = [message || "Analyze this image for me."];
+            let messages = [
+                { role: 'system', content: systemInstruction }
+            ];
             
             if (image) {
                 const matches = image.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
                 if (matches && matches.length === 3) {
-                    parts.push({
-                        inlineData: {
-                            mimeType: matches[1],
-                            data: matches[2]
-                        }
+                    messages.push({
+                        role: 'user',
+                        content: [
+                            { type: 'text', text: message || "Analyze this image for me." },
+                            { type: 'image_url', image_url: { url: image } }
+                        ]
                     });
+                } else {
+                    messages.push({ role: 'user', content: message || "Analyze this image for me." });
                 }
+            } else {
+                messages.push({ role: 'user', content: message || "Hello" });
             }
 
-            const generateWithRetry = async (parts, maxRetries = 3) => {
+            const tools = [
+                {
+                    type: "function",
+                    function: {
+                        name: "search_web",
+                        description: "Search the web for real-time information",
+                        parameters: {
+                            type: "object",
+                            properties: {
+                                query: {
+                                    type: "string",
+                                    description: "The search query"
+                                }
+                            },
+                            required: ["query"]
+                        }
+                    }
+                }
+            ];
+
+            const generateWithRetry = async (messagesArray, includeTools = true, maxRetries = 3) => {
                 for (let i = 0; i < maxRetries; i++) {
                     try {
-                        return await model.generateContent(parts);
+                        const payload = {
+                            model: image ? 'llama-3.2-11b-vision-preview' : 'llama-3.3-70b-versatile',
+                            messages: messagesArray,
+                            temperature: 0.7,
+                            max_completion_tokens: 1024,
+                        };
+                        if (includeTools && !image) {
+                            payload.tools = tools;
+                            payload.tool_choice = "auto";
+                        }
+                        return await groq.chat.completions.create(payload);
                     } catch (error) {
                         const errMsg = error.message || '';
-                        if (errMsg.includes('503') || errMsg.includes('Service Unavailable') || errMsg.includes('overloaded')) {
+                        if (errMsg.includes('503') || errMsg.includes('Service Unavailable') || errMsg.includes('overloaded') || errMsg.includes('429')) {
                             if (i === maxRetries - 1) throw error;
-                            const delay = Math.pow(2, i) * 1000 + Math.random() * 1000; // Exponential backoff with jitter
-                            console.log(`[Gemini API] 503 error encountered, retrying in ${Math.round(delay)}ms... (Attempt ${i + 1}/${maxRetries - 1})`);
+                            const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
+                            console.log(`[Groq API] error encountered, retrying in ${Math.round(delay)}ms... (Attempt ${i + 1}/${maxRetries - 1})`);
                             await new Promise(resolve => setTimeout(resolve, delay));
                         } else {
                             throw error;
@@ -199,15 +235,51 @@ exports.handleChat = async (req, res, next) => {
                 }
             };
 
-            const result = await generateWithRetry(parts);
-            const responseText = result.response.text();
+            const searchWeb = async (query) => {
+                try {
+                    const { data } = await axios.get(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&utf8=&format=json`, {
+                        headers: { 'User-Agent': 'SmartBillChatbot/1.0 (https://github.com/my-smartbill)' }
+                    });
+                    if (data && data.query && data.query.search) {
+                        let results = data.query.search.slice(0, 3).map(r => r.snippet.replace(/<\/?[^>]+(>|$)/g, ""));
+                        return results.length ? results.join('\n') : "No search results found.";
+                    }
+                    return "No search results found.";
+                } catch (e) {
+                    return "Search failed.";
+                }
+            };
+
+            let response = await generateWithRetry(messages);
+            let responseMessage = response.choices[0]?.message;
+
+            // Handle tool calls if LLaMA model decides to search
+            if (responseMessage && responseMessage.tool_calls && responseMessage.tool_calls.length > 0) {
+                messages.push(responseMessage);
+                for (const toolCall of responseMessage.tool_calls) {
+                    if (toolCall.function.name === 'search_web') {
+                        const args = JSON.parse(toolCall.function.arguments);
+                        const searchResults = await searchWeb(args.query);
+                        messages.push({
+                            tool_call_id: toolCall.id,
+                            role: "tool",
+                            name: "search_web",
+                            content: searchResults,
+                        });
+                    }
+                }
+                const secondResponse = await generateWithRetry(messages, false);
+                responseMessage = secondResponse.choices[0]?.message;
+            }
+
+            const responseText = responseMessage?.content || "No response received.";
 
             return sendResponse(res, 200, true, 'Chatbot reply', { reply: responseText });
         } catch (aiErr) {
-            console.error('Gemini Error:', aiErr);
+            console.error('Groq Error:', aiErr);
             const errMsg = aiErr.message || '';
-            if (errMsg.includes('API key not valid') || errMsg.includes('not found')) {
-                return sendResponse(res, 200, true, 'Chatbot reply', { reply: 'Gemini AI is unable to respond because the provided API key is invalid or lacks access to the required Gemini models. Please check your GEMINI_API_KEY.' });
+            if (errMsg.includes('API key not valid') || errMsg.includes('not found') || errMsg.includes('401')) {
+                return sendResponse(res, 200, true, 'Chatbot reply', { reply: 'Groq AI is unable to respond because the provided API key is invalid. Please check your GROQ_API_KEY.' });
             }
             return sendResponse(res, 200, true, 'Chatbot reply', { reply: 'Sorry, I am having trouble connecting to my AI brain right now. ' + errMsg });
         }
