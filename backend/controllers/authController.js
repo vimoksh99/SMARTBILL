@@ -70,9 +70,9 @@ exports.register = async (req, res, next) => {
             }).catch(err => console.error('Failed to send verification SMS', err));
         }
 
-        // Include OTP in response ONLY if email credentials are not set (for local testing)
-        const responseData = !process.env.EMAIL_PASS ? { otp } : undefined;
-        sendResponse(res, 200, true, 'OTP sent for verification', responseData);
+        // Production mode: OTP is only sent via email/SMS, not returned to frontend
+        const responseData = undefined;
+        sendResponse(res, 200, true, 'OTP sent to your email. Please check your Inbox and Spam folder.', responseData);
     } catch (err) {
         next(err);
     }
@@ -128,9 +128,9 @@ exports.login = async (req, res, next) => {
             }).catch(err => console.error('Failed to send login alert SMS', err));
         }
 
-        // Include OTP in response ONLY if email credentials are not set (for local testing)
-        const responseData = !process.env.EMAIL_PASS ? { email: user.email, otp } : { email: user.email };
-        sendResponse(res, 200, true, 'OTP sent for 2FA', responseData);
+        // Production mode: OTP is only sent via email/SMS
+        const responseData = { email: user.email };
+        sendResponse(res, 200, true, 'OTP sent to your email. Please check your Inbox and Spam folder.', responseData);
     } catch (err) {
         next(err);
     }
@@ -206,9 +206,9 @@ exports.resendOtp = async (req, res, next) => {
             }).catch(err => console.error('Failed to resend auth SMS', err));
         }
 
-        // Include OTP in response ONLY if email credentials are not set (for local testing)
-        const responseData = !process.env.EMAIL_PASS ? { otp } : undefined;
-        sendResponse(res, 200, true, 'OTP resent via email and SMS', responseData);
+        // Production mode: OTP is only sent via email/SMS
+        const responseData = undefined;
+        sendResponse(res, 200, true, 'OTP resent to your email. Please check your Inbox and Spam folder.', responseData);
     } catch (err) {
         next(err);
     }
@@ -265,9 +265,9 @@ exports.forgotPassword = async (req, res, next) => {
             }).catch(err => console.error('Failed to send forgot password SMS', err));
         }
 
-        // Include OTP in response ONLY if email credentials are not set (for local testing)
-        const responseData = !process.env.EMAIL_PASS ? { otp } : undefined;
-        sendResponse(res, 200, true, 'OTP sent to email and phone', responseData);
+        // Production mode: OTP is only sent via email/SMS
+        const responseData = undefined;
+        sendResponse(res, 200, true, 'OTP sent to your email. Please check your Inbox and Spam folder.', responseData);
     } catch (err) {
         next(err);
     }

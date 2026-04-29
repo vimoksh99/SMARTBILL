@@ -19,13 +19,15 @@ const sendEmail = async (options) => {
         return;
     }
 
+    const cleanPass = process.env.EMAIL_PASS ? process.env.EMAIL_PASS.replace(/^["']|["']$/g, '') : null;
+
     const transporter = nodemailer.createTransport({
         host: 'smtp.gmail.com',
         port: 465,
         secure: true, // true for port 465
         auth: {
             user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS,
+            pass: cleanPass,
         },
     });
 
