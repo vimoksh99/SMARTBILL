@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:3000';
+// API_BASE_URL is inherited from dashboard.js
 const chatToggle = document.getElementById('chatbot-toggle');
 const chatWindow = document.getElementById('chat-window');
 const closeChat = document.getElementById('close-chat');
