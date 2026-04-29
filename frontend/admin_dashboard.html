@@ -60,7 +60,7 @@
             <!-- Overview Section -->
             <section id="overview" class="tab-content active">
                 <div class="analytics-grid" style="margin-bottom: 2rem;">
-                    <div class="stat-card glass-panel" style="border-left: 4px solid var(--primary-color);">
+                    <div class="stat-card glass-panel" style="border-left: 4px solid var(--accent-primary);">
                         <h4>Platform Members</h4>
                         <h2 id="total-users">0</h2>
                     </div>
@@ -155,7 +155,7 @@
                             <label style="display:block; margin-bottom: 0.5rem; color: #cbd5e1;">New Password</label>
                             <input type="password" id="set-new-pwd" required style="width:100%; padding: 10px; border-radius: 8px; border: 1px solid var(--glass-border); background: rgba(0,0,0,0.2); color: white;">
                         </div>
-                        <button type="submit" class="primary-btn" style="background:var(--secondary-color); width: 100%;">Update My Password</button>
+                        <button type="submit" class="primary-btn" style="background:var(--accent-secondary); width: 100%;">Update My Password</button>
                     </form>
                 </div>
             </section>
@@ -200,14 +200,14 @@
     <div class="overlay" id="overlay"></div>
 
     <!-- Custom Modal -->
-    <div id="custom-modal" class="modal-overlay" style="display:none; align-items:center; justify-content:center; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7); z-index:9999;">
-        <div class="modal-content glass-panel" style="max-width:400px; width:90%; padding:2rem; text-align:center;">
+    <div id="custom-modal" class="modal-overlay" style="display:none; z-index:9999;">
+        <div class="modal-content glass-panel" style="text-align:center;">
             <h3 id="modal-title" style="margin-bottom:1rem;">Title</h3>
             <p id="modal-msg" style="margin-bottom:1.5rem; color:var(--text-secondary);">Message</p>
             <input type="text" id="modal-input" style="display:none; width:100%; padding:10px; border-radius:8px; border:1px solid var(--glass-border); background:rgba(0,0,0,0.2); color:white; margin-bottom:1.5rem;">
-            <div class="modal-actions" style="display:flex; gap:10px; justify-content:center;">
-                <button id="modal-cancel-btn" class="secondary-btn" style="padding:8px 16px;">Cancel</button>
-                <button id="modal-confirm-btn" class="primary-btn" style="padding:8px 16px;">Confirm</button>
+            <div class="modal-actions" style="display:flex; justify-content:center; gap: 1rem;">
+                <button id="modal-cancel-btn" class="secondary-btn">Cancel</button>
+                <button id="modal-confirm-btn" class="primary-btn">Confirm</button>
             </div>
         </div>
     </div>
