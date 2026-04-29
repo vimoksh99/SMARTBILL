@@ -22,7 +22,7 @@ const sendEmail = async (options) => {
         const payload = {
             sender: {
                 name: process.env.FROM_NAME || "SmartBill Support",
-                email: "smartbilllpu@gmail.com"
+                email: process.env.EMAIL_USER || "smartbilllpu@gmail.com"
             },
             to: [{ email: options.email }],
             subject: options.subject,
