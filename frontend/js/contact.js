@@ -1,3 +1,4 @@
+const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:') ? 'http://localhost:3000' : 'https://smartbill-vqjf.onrender.com';
 // Check auth
 const token = localStorage.getItem('token');
 if (!token) {
@@ -30,7 +31,7 @@ window.fetch = async (...args) => {
 
 document.getElementById('logout-btn').addEventListener('click', async () => {
     try {
-        await fetch('https://smartbill-vqjf.onrender.com/api/auth/logout');
+        await fetch(API_BASE_URL + '/api/auth/logout');
     } catch (err) {}
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -49,7 +50,7 @@ document.getElementById('complaint-form').addEventListener('submit', async (e) =
     submitBtn.style.opacity = '0.7';
 
     try {
-        const res = await fetch('https://smartbill-vqjf.onrender.com/api/complaints', {
+        const res = await fetch(API_BASE_URL + '/api/complaints', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -93,7 +94,7 @@ let showAllTickets = false;
 // Fetch My Tickets
 window.fetchMyTickets = async () => {
     try {
-        const res = await fetch('https://smartbill-vqjf.onrender.com/api/complaints/my', {
+        const res = await fetch(API_BASE_URL + '/api/complaints/my', {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await res.json();
@@ -169,7 +170,7 @@ function renderTickets() {
 
 async function fetchSettings() {
     try {
-        const res = await fetch('https://smartbill-vqjf.onrender.com/api/settings');
+        const res = await fetch(API_BASE_URL + '/api/settings');
         const data = await res.json();
         if(data.success && data.data) {
             document.getElementById('contact-email').innerText = data.data.supportEmail || 'N/A';
@@ -183,7 +184,7 @@ async function fetchSettings() {
 
 async function fetchFounders() {
     try {
-        const res = await fetch('https://smartbill-vqjf.onrender.com/api/founders');
+        const res = await fetch(API_BASE_URL + '/api/founders');
         const data = await res.json();
         const list = document.getElementById('public-founders-list');
         
@@ -219,7 +220,7 @@ fetchFounders();
 setInterval(async () => {
     if (token) {
         try {
-            await fetch('https://smartbill-vqjf.onrender.com/api/auth/me', {
+            await fetch(API_BASE_URL + '/api/auth/me', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
         } catch (err) {}

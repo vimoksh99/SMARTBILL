@@ -331,3 +331,55 @@ exports.updatePassword = async (req, res, next) => {
         next(err);
     }
 };
+
+// @desc    Test Email Configuration
+// @route   GET /api/auth/test-email
+// @access  Public
+exports.testEmail = async (req, res, next) => {
+    try {
+        const nodemailer = require('nodemailer');
+        
+        // Return environment variables state (without exposing full secrets)
+        const envStatus = {
+            EMAIL_USER_SET: !!process.env.EMAIL_USER,
+            EMAIL_USER: process.env.EMAIL_USER,
+            EMAIL_PASS_SET: !!process.env.EMAIL_PASS,
+            PASS_LENGTH: process.env.EMAIL_PASS ? process.env.EMAIL_PASS.length : 0
+        };
+
+        if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+            return res.status(400).json({ success: false, message: 'Email credentials not set', env: envStatus });
+        }
+
+        const transporter = nodemailer.createTransport({
+            host: 'smtp.gmail.com',
+            port: 465,
+            secure: true,
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS,
+            },
+        });
+
+        // Try verifying connection
+        await transporter.verify();
+
+        return res.status(200).json({ 
+            success: true, 
+            message: 'Email configuration is perfect! Connection to SMTP successful.',
+            env: envStatus 
+        });
+
+    } catch (err) {
+        return res.status(500).json({ 
+            success: false, 
+            message: 'Email configuration failed', 
+            error: err.message,
+            stack: err.stack,
+            env: {
+                EMAIL_USER_SET: !!process.env.EMAIL_USER,
+                EMAIL_PASS_SET: !!process.env.EMAIL_PASS
+            }
+        });
+    }
+};

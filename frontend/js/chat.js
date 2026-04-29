@@ -1,3 +1,4 @@
+const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:') ? 'http://localhost:3000' : 'https://smartbill-vqjf.onrender.com';
 const chatToggle = document.getElementById('chatbot-toggle');
 const chatWindow = document.getElementById('chat-window');
 const closeChat = document.getElementById('close-chat');
@@ -130,7 +131,7 @@ async function sendChatMsgAPI(text) {
     }
 
     try {
-        const res = await fetch('https://smartbill-vqjf.onrender.com/api/chat', {
+        const res = await fetch(API_BASE_URL + '/api/chat', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

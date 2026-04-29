@@ -1,3 +1,4 @@
+const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:') ? 'http://localhost:3000' : 'https://smartbill-vqjf.onrender.com';
 const token = localStorage.getItem('token');
 const user = JSON.parse(localStorage.getItem('user'));
 
@@ -38,7 +39,7 @@ function logout() {
 }
 
 async function fetchAnalytics() {
-    const res = await fetch('https://smartbill-vqjf.onrender.com/api/bills/analytics', {
+    const res = await fetch(API_BASE_URL + '/api/bills/analytics', {
         headers: { 'Authorization': `Bearer ${token}` }
     });
     const { success, data } = await res.json();
@@ -54,7 +55,7 @@ let notificationsData = [];
 
 async function fetchNotifications() {
     try {
-        const res = await fetch('https://smartbill-vqjf.onrender.com/api/notifications', {
+        const res = await fetch(API_BASE_URL + '/api/notifications', {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const { success, data } = await res.json();
@@ -103,7 +104,7 @@ function renderNotifications() {
 
 async function markAsRead(id) {
     try {
-        const res = await fetch(`https://smartbill-vqjf.onrender.com/api/notifications/${id}/read`, {
+        const res = await fetch(`${API_BASE_URL}/api/notifications/${id}/read`, {
             method: 'PUT',
             headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -116,7 +117,7 @@ async function markAllAsRead(e) {
     try {
         const unreadNotifs = notificationsData.filter(n => !n.read);
         for(let n of unreadNotifs) {
-            await fetch(`https://smartbill-vqjf.onrender.com/api/notifications/${n._id}/read`, {
+            await fetch(`${API_BASE_URL}/api/notifications/${n._id}/read`, {
                 method: 'PUT',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -147,7 +148,7 @@ if(notifBtn && notifDropdown) {
 
 async function fetchBills() {
     document.getElementById('loading').style.display = 'block';
-    const res = await fetch('https://smartbill-vqjf.onrender.com/api/bills', {
+    const res = await fetch(API_BASE_URL + '/api/bills', {
         headers: { 'Authorization': `Bearer ${token}` }
     });
     const { success, data } = await res.json();
@@ -209,7 +210,7 @@ document.getElementById('bill-form').addEventListener('submit', async (e) => {
         paymentLink: document.getElementById('bill-link').value
     };
 
-    const res = await fetch('https://smartbill-vqjf.onrender.com/api/bills', {
+    const res = await fetch(API_BASE_URL + '/api/bills', {
         method: 'POST',
         headers: { 
             'Content-Type': 'application/json',
@@ -241,7 +242,7 @@ function markPaymentAttempt() { }
 
 async function markAsPaidConfirm() {
     if(!currentPaymentBillId) return;
-    await fetch(`https://smartbill-vqjf.onrender.com/api/bills/${currentPaymentBillId}`, {
+    await fetch(`${API_BASE_URL}/api/bills/${currentPaymentBillId}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
@@ -283,7 +284,7 @@ async function markAsPaidConfirm() {
 async function deleteBill(id) {
     const isConfirmed = await customConfirm('Delete Bill', 'Are you sure you want to delete this bill?');
     if(isConfirmed) {
-        await fetch(`https://smartbill-vqjf.onrender.com/api/bills/${id}`, {
+        await fetch(`${API_BASE_URL}/api/bills/${id}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -292,7 +293,7 @@ async function deleteBill(id) {
 }
 
 function exportData(type) {
-    window.open(`https://smartbill-vqjf.onrender.com/api/export/${type}?token=${token}`, '_blank');
+    window.open(`${API_BASE_URL}/api/export/${type}?token=${token}`, '_blank');
 }
 
 function refreshAll() {
@@ -347,7 +348,7 @@ refreshAll();
 setInterval(async () => {
     if (token) {
         try {
-            await fetch('https://smartbill-vqjf.onrender.com/api/auth/me', {
+            await fetch(API_BASE_URL + '/api/auth/me', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
         } catch (err) {}

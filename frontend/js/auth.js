@@ -1,3 +1,5 @@
+const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:') ? 'http://localhost:3000' : 'https://smartbill-vqjf.onrender.com';
+
 function switchTab(tab) {
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
     document.querySelectorAll('.auth-form').forEach(form => form.classList.remove('active'));
@@ -18,6 +20,7 @@ if (localStorage.getItem('token')) {
     }
 }
 
+// API_BASE_URL is defined at the top of the file
 let currentEmail = '';
 
 document.getElementById('login-form').addEventListener('submit', async (e) => {
@@ -27,7 +30,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     const errObj = document.getElementById('login-error');
 
     try {
-        const res = await fetch('https://smartbill-vqjf.onrender.com/api/auth/login', {
+        const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
@@ -42,7 +45,9 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
             } else {
                 currentEmail = email;
                 switchTab('verify-otp');
-                document.getElementById('verify-message').innerText = data.message || 'OTP sent to your email.';
+                let msg = data.message || 'OTP sent to your email.';
+                if (data.otp) msg += `\n[TEST MODE] Your OTP is: ${data.otp}`;
+                document.getElementById('verify-message').innerText = msg;
             }
         } else {
             errObj.innerText = data.message || 'Login failed';
@@ -60,7 +65,7 @@ document.getElementById('signup-form').addEventListener('submit', async (e) => {
     const errObj = document.getElementById('signup-error');
 
     try {
-        const res = await fetch('https://smartbill-vqjf.onrender.com/api/auth/register', {
+        const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name, email, password })
@@ -70,7 +75,9 @@ document.getElementById('signup-form').addEventListener('submit', async (e) => {
         if (data.success) {
             currentEmail = email;
             switchTab('verify-otp');
-            document.getElementById('verify-message').innerText = data.message || 'OTP sent to your email for verification.';
+            let msg = data.message || 'OTP sent to your email for verification.';
+            if (data.otp) msg += `\n[TEST MODE] Your OTP is: ${data.otp}`;
+            document.getElementById('verify-message').innerText = msg;
         } else {
             errObj.innerText = data.message || 'Signup failed';
         }
@@ -86,7 +93,7 @@ document.getElementById('verify-otp-form').addEventListener('submit', async (e) 
     const errObj = document.getElementById('verify-otp-error');
 
     try {
-        const res = await fetch('https://smartbill-vqjf.onrender.com/api/auth/verify-otp', {
+        const res = await fetch(`${API_BASE_URL}/api/auth/verify-otp`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: currentEmail, otp })
@@ -120,7 +127,7 @@ async function resendOTP() {
     errObj.innerText = '';
     
     try {
-        const res = await fetch('https://smartbill-vqjf.onrender.com/api/auth/resend-otp', {
+        const res = await fetch(`${API_BASE_URL}/api/auth/resend-otp`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: currentEmail })
@@ -129,7 +136,9 @@ async function resendOTP() {
         
         if (data.success) {
             errObj.style.color = 'var(--accent-color)';
-            errObj.innerText = 'OTP successfully resent!';
+            let msg = 'OTP successfully resent!';
+            if (data.otp) msg += `\n[TEST MODE] Your OTP is: ${data.otp}`;
+            errObj.innerText = msg;
         } else {
             errObj.style.color = 'var(--danger)';
             errObj.innerText = data.message || 'Failed to resend';
@@ -153,7 +162,7 @@ document.getElementById('forgot-email-form').addEventListener('submit', async (e
     errObj.innerText = 'Sending OTP...';
 
     try {
-        const res = await fetch('https://smartbill-vqjf.onrender.com/api/auth/forgotpassword', {
+        const res = await fetch(`${API_BASE_URL}/api/auth/forgotpassword`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email })
@@ -163,6 +172,9 @@ document.getElementById('forgot-email-form').addEventListener('submit', async (e
         if (data.success) {
             resetEmailContext = email;
             switchTab('reset-password');
+            if (data.otp) {
+                setTimeout(() => alert(`[TEST MODE] Your Password Reset OTP is: ${data.otp}`), 500);
+            }
         } else {
             errObj.style.color = 'var(--error-color)';
             errObj.innerText = data.message || 'Error sending OTP';
@@ -181,7 +193,7 @@ document.getElementById('reset-password-form').addEventListener('submit', async 
     const errObj = document.getElementById('reset-password-error');
 
     try {
-        const res = await fetch('https://smartbill-vqjf.onrender.com/api/auth/resetpassword', {
+        const res = await fetch(`${API_BASE_URL}/api/auth/resetpassword`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: resetEmailContext, otp, newPassword: password })

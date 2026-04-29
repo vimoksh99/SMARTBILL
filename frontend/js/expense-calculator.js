@@ -1,3 +1,4 @@
+const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:') ? 'http://localhost:3000' : 'https://smartbill-vqjf.onrender.com';
 const BUDGET_LIMIT = 50000;
 
 const categories = [
@@ -86,7 +87,7 @@ async function fetchAnalyticsData() {
     const token = localStorage.getItem('token');
     if (!token) return;
     try {
-        const res = await fetch('https://smartbill-vqjf.onrender.com/api/bills/analytics', {
+        const res = await fetch(API_BASE_URL + '/api/bills/analytics', {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const { success, data } = await res.json();
@@ -363,7 +364,7 @@ const token = localStorage.getItem('token');
 if (token) {
     setInterval(async () => {
         try {
-            const res = await fetch('https://smartbill-vqjf.onrender.com/api/auth/me', {
+            const res = await fetch(API_BASE_URL + '/api/auth/me', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.status === 401 || res.status === 403) {

@@ -1,3 +1,4 @@
+const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:') ? 'http://localhost:3000' : 'https://smartbill-vqjf.onrender.com';
 // Check Authentication & Role
 const token = localStorage.getItem('token');
 const userStr = localStorage.getItem('user');
@@ -14,7 +15,7 @@ if (user.role !== 'admin') {
 // Logout
 document.getElementById('logout-btn').addEventListener('click', async () => {
     try {
-        await fetch('https://smartbill-vqjf.onrender.com/api/auth/logout');
+        await fetch(API_BASE_URL + '/api/auth/logout');
     } catch (err) {}
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -63,7 +64,7 @@ function setupTabs() {
 
 async function fetchStats() {
     try {
-        const res = await fetch('https://smartbill-vqjf.onrender.com/api/admin/dashboard', {
+        const res = await fetch(API_BASE_URL + '/api/admin/dashboard', {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await res.json();
@@ -80,7 +81,7 @@ let allAdminUsers = [];
 
 async function fetchUsers() {
     try {
-        const res = await fetch('https://smartbill-vqjf.onrender.com/api/admin/users', {
+        const res = await fetch(API_BASE_URL + '/api/admin/users', {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await res.json();
@@ -143,7 +144,7 @@ window.toggleBlock = async (id) => {
     if(!isConfirmed) return;
 
     try {
-        const res = await fetch(`https://smartbill-vqjf.onrender.com/api/admin/users/${id}/block`, {
+        const res = await fetch(`${API_BASE_URL}/api/admin/users/${id}/block`, {
             method: 'PUT',
             headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -163,7 +164,7 @@ window.deleteUser = async (id) => {
     if(!isConfirmed) return;
 
     try {
-        const res = await fetch(`https://smartbill-vqjf.onrender.com/api/admin/users/${id}`, {
+        const res = await fetch(`${API_BASE_URL}/api/admin/users/${id}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -181,7 +182,7 @@ window.deleteUser = async (id) => {
 
 async function fetchComplaints() {
     try {
-        const res = await fetch('https://smartbill-vqjf.onrender.com/api/admin/complaints', {
+        const res = await fetch(API_BASE_URL + '/api/admin/complaints', {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await res.json();
@@ -232,7 +233,7 @@ window.resolveComplaint = async (id) => {
     if (reply === null) return; // User cancelled
 
     try {
-        const res = await fetch(`https://smartbill-vqjf.onrender.com/api/admin/complaints/${id}`, {
+        const res = await fetch(`${API_BASE_URL}/api/admin/complaints/${id}`, {
             method: 'PUT',
             headers: { 
                 'Authorization': `Bearer ${token}`,
@@ -302,7 +303,7 @@ window.customPrompt = (title, msg) => openModalContainer(title, msg, true, "Subm
 /* --- SETTINGS LOGIC --- */
 async function fetchSettings() {
     try {
-        const res = await fetch('https://smartbill-vqjf.onrender.com/api/settings');
+        const res = await fetch(API_BASE_URL + '/api/settings');
         const data = await res.json();
         if(data.success && data.data) {
             document.getElementById('set-email').value = data.data.supportEmail || '';
@@ -323,7 +324,7 @@ if (settingsForm) {
         const supportAddress = document.getElementById('set-address').value;
 
         try {
-            const res = await fetch('https://smartbill-vqjf.onrender.com/api/settings', {
+            const res = await fetch(API_BASE_URL + '/api/settings', {
                 method: 'PUT',
                 headers: { 
                     'Content-Type': 'application/json',
@@ -352,7 +353,7 @@ if (pwdForm) {
         const newPassword = document.getElementById('set-new-pwd').value;
 
         try {
-            const res = await fetch('https://smartbill-vqjf.onrender.com/api/auth/updatepassword', {
+            const res = await fetch(API_BASE_URL + '/api/auth/updatepassword', {
                 method: 'PUT',
                 headers: { 
                     'Content-Type': 'application/json',
@@ -376,7 +377,7 @@ if (pwdForm) {
 /* --- FOUNDERS LOGIC --- */
 window.fetchFoundersAdmin = async () => {
     try {
-        const res = await fetch('https://smartbill-vqjf.onrender.com/api/founders');
+        const res = await fetch(API_BASE_URL + '/api/founders');
         const data = await res.json();
         
         const grid = document.getElementById('founders-grid');
@@ -413,7 +414,7 @@ window.deleteFounder = async (id) => {
     const confirmDel = await customConfirm("Delete", "Remove this founder profile?");
     if(!confirmDel) return;
     try {
-        const res = await fetch(`https://smartbill-vqjf.onrender.com/api/founders/${id}`, {
+        const res = await fetch(`${API_BASE_URL}/api/founders/${id}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -447,7 +448,7 @@ if (founderForm) {
             const base64Str = reader.result;
             
             try {
-                const res = await fetch('https://smartbill-vqjf.onrender.com/api/founders', {
+                const res = await fetch(API_BASE_URL + '/api/founders', {
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',
