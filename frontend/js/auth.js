@@ -46,8 +46,14 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
                 currentEmail = email;
                 switchTab('verify-otp');
                 let msg = data.message || 'OTP sent to your email.';
-                if (data.otp) msg += `\n[TEST MODE] Your OTP is: ${data.otp}`;
                 document.getElementById('verify-message').innerText = msg;
+                
+                // Demo Mode Auto-Fill
+                if (data.otp) {
+                    document.getElementById('verify-otp-input').value = data.otp;
+                    document.getElementById('verify-message').innerHTML = `<b>Demo Mode Active:</b> OTP has been securely auto-filled for your presentation!`;
+                    document.getElementById('verify-message').style.color = 'var(--accent-color)';
+                }
             }
         } else {
             errObj.innerText = data.message || 'Login failed';
@@ -76,8 +82,14 @@ document.getElementById('signup-form').addEventListener('submit', async (e) => {
             currentEmail = email;
             switchTab('verify-otp');
             let msg = data.message || 'OTP sent to your email for verification.';
-            if (data.otp) msg += `\n[TEST MODE] Your OTP is: ${data.otp}`;
             document.getElementById('verify-message').innerText = msg;
+
+            // Demo Mode Auto-Fill
+            if (data.otp) {
+                document.getElementById('verify-otp-input').value = data.otp;
+                document.getElementById('verify-message').innerHTML = `<b>Demo Mode Active:</b> OTP has been securely auto-filled for your presentation!`;
+                document.getElementById('verify-message').style.color = 'var(--accent-color)';
+            }
         } else {
             errObj.innerText = data.message || 'Signup failed';
         }
@@ -137,8 +149,13 @@ async function resendOTP() {
         if (data.success) {
             errObj.style.color = 'var(--accent-color)';
             let msg = 'OTP successfully resent!';
-            if (data.otp) msg += `\n[TEST MODE] Your OTP is: ${data.otp}`;
             errObj.innerText = msg;
+
+            // Demo Mode Auto-Fill
+            if (data.otp) {
+                document.getElementById('verify-otp-input').value = data.otp;
+                errObj.innerHTML = `<b>Demo Mode Active:</b> OTP has been securely auto-filled!`;
+            }
         } else {
             errObj.style.color = 'var(--danger)';
             errObj.innerText = data.message || 'Failed to resend';
@@ -172,8 +189,15 @@ document.getElementById('forgot-email-form').addEventListener('submit', async (e
         if (data.success) {
             resetEmailContext = email;
             switchTab('reset-password');
+            
+            // Demo Mode Auto-Fill
             if (data.otp) {
-                setTimeout(() => alert(`[TEST MODE] Your Password Reset OTP is: ${data.otp}`), 500);
+                document.getElementById('reset-otp').value = data.otp;
+                const resetMsg = document.getElementById('reset-password-error');
+                if(resetMsg) {
+                    resetMsg.innerHTML = `<b>Demo Mode Active:</b> OTP auto-filled!`;
+                    resetMsg.style.color = 'var(--accent-color)';
+                }
             }
         } else {
             errObj.style.color = 'var(--error-color)';
