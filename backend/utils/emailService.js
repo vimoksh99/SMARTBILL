@@ -1,4 +1,4 @@
-const nodemailer = require('nodemailer');
+const axios = require('axios');
 const User = require('../models/User');
 
 const sendEmail = async (options) => {
@@ -12,37 +12,36 @@ const sendEmail = async (options) => {
         console.error('Error checking admin for email:', err);
     }
 
-    // If no credentials, just mock the console output
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    if (!process.env.BREVO_API_KEY) {
         console.log(`[MOCK EMAIL] To: ${options.email}, Subject: ${options.subject}`);
         console.log(`[MOCK EMAIL BODY]\n${options.message}`);
         return;
     }
 
-    const cleanPass = process.env.EMAIL_PASS ? process.env.EMAIL_PASS.replace(/^["']|["']$/g, '') : null;
+    try {
+        const payload = {
+            sender: {
+                name: process.env.FROM_NAME || "SmartBill Support",
+                email: "smartbilllpu@gmail.com"
+            },
+            to: [{ email: options.email }],
+            subject: options.subject,
+            htmlContent: options.message
+        };
 
-    const transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 587,
-        secure: false, // false for port 587
-        family: 4, // Force IPv4
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: cleanPass,
-        },
-    });
-
-    const fromName = process.env.FROM_NAME || 'SmartBill Support';
-    
-    const message = {
-        from: `${fromName} <${process.env.EMAIL_USER}>`,
-        to: options.email,
-        subject: options.subject,
-        html: options.message,
-    };
-
-    const info = await transporter.sendMail(message);
-    console.log('Message sent: %s', info.messageId);
+        const response = await axios.post('https://api.brevo.com/v3/smtp/email', payload, {
+            headers: {
+                'accept': 'application/json',
+                'api-key': process.env.BREVO_API_KEY,
+                'content-type': 'application/json'
+            }
+        });
+        
+        console.log('Email sent successfully via Brevo API:', response.data);
+    } catch (err) {
+        console.error('Brevo API Error:', err.response ? err.response.data : err.message);
+        throw err;
+    }
 };
 
 module.exports = sendEmail;

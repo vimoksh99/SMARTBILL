@@ -70,9 +70,9 @@ exports.register = async (req, res, next) => {
             }).catch(err => console.error('Failed to send verification SMS', err));
         }
 
-        // Production mode fallback: Render blocks free outbound SMTP. Return OTP for seamless auto-fill.
-        const responseData = { otp };
-        sendResponse(res, 200, true, 'OTP generated. Auto-filling for presentation...', responseData);
+        // Production mode: OTP is only sent via email
+        const responseData = undefined;
+        sendResponse(res, 200, true, 'OTP sent to your email. Please check your Inbox and Spam folder.', responseData);
     } catch (err) {
         next(err);
     }
@@ -128,9 +128,9 @@ exports.login = async (req, res, next) => {
             }).catch(err => console.error('Failed to send login alert SMS', err));
         }
 
-        // Production mode fallback: Render blocks free outbound SMTP. Return OTP for seamless auto-fill.
-        const responseData = { email: user.email, otp };
-        sendResponse(res, 200, true, 'OTP generated. Auto-filling for presentation...', responseData);
+        // Production mode: OTP is only sent via email
+        const responseData = { email: user.email };
+        sendResponse(res, 200, true, 'OTP sent to your email. Please check your Inbox and Spam folder.', responseData);
     } catch (err) {
         next(err);
     }
@@ -206,9 +206,9 @@ exports.resendOtp = async (req, res, next) => {
             }).catch(err => console.error('Failed to resend auth SMS', err));
         }
 
-        // Production mode fallback: Render blocks free outbound SMTP. Return OTP for seamless auto-fill.
-        const responseData = { otp };
-        sendResponse(res, 200, true, 'OTP regenerated. Auto-filling for presentation...', responseData);
+        // Production mode: OTP is only sent via email
+        const responseData = undefined;
+        sendResponse(res, 200, true, 'OTP resent to your email. Please check your Inbox and Spam folder.', responseData);
     } catch (err) {
         next(err);
     }
@@ -265,9 +265,9 @@ exports.forgotPassword = async (req, res, next) => {
             }).catch(err => console.error('Failed to send forgot password SMS', err));
         }
 
-        // Production mode fallback: Render blocks free outbound SMTP. Return OTP for seamless auto-fill.
-        const responseData = { otp };
-        sendResponse(res, 200, true, 'OTP generated. Auto-filling for presentation...', responseData);
+        // Production mode: OTP is only sent via email
+        const responseData = undefined;
+        sendResponse(res, 200, true, 'OTP sent to your email. Please check your Inbox and Spam folder.', responseData);
     } catch (err) {
         next(err);
     }
