@@ -580,10 +580,49 @@ h1, h2, h3, h4 {
 @media (max-width: 1024px) {
     .analytics-grid { grid-template-columns: 1fr 1fr; }
     .actions-bar { flex-direction: column; align-items: flex-start; gap: 1.5rem; }
+    .glass-nav { padding: 1rem 2%; }
+    .dashboard-container { padding: 2rem 2%; }
 }
 
 @media (max-width: 768px) {
-    .nav-items { display: none; /* Add hamburger menu logic if needed, or keep minimal */ }
-    .bills-grid { grid-template-columns: 1fr; }
-    .auth-container { padding: 2.5rem 2rem; }
+    /* Navbar Wrapping instead of hiding */
+    .glass-nav {
+        flex-direction: column;
+        gap: 15px;
+        padding: 1rem;
+    }
+    .nav-items {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        width: 100%;
+    }
+    .nav-items a { margin-right: 5px !important; font-size: 0.9rem; }
+    .nav-items button { padding: 0.5rem 1rem; font-size: 0.9rem; }
+    
+    /* Layout Adjustments */
+    .analytics-grid { grid-template-columns: 1fr; gap: 1rem; margin-bottom: 2rem; }
+    .bills-grid { grid-template-columns: 1fr; gap: 1rem; }
+    .auth-container { padding: 2rem 1.5rem; max-width: 95%; margin: 1rem auto; }
+    .auth-header h1 { font-size: 2.2rem; }
+    .stat-card h2 { font-size: 2.2rem; }
+    
+    /* Modals */
+    .modal-content { padding: 1.5rem; width: 95%; }
+    
+    /* Actions Bar */
+    .actions-bar { width: 100%; align-items: center; text-align: center; }
+    .action-buttons { flex-wrap: wrap; justify-content: center; width: 100%; }
+    
+    /* Expense Calculator specifics */
+    .calc-container { padding: 1.5rem; width: 95%; }
+    .results-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+    .auth-header h1 { font-size: 1.8rem; }
+    .auth-tabs { flex-direction: column; }
+    .nav-brand { font-size: 1.5rem; }
+    .bill-amount { font-size: 2rem; }
 }
