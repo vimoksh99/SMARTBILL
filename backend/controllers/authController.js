@@ -70,7 +70,9 @@ exports.register = async (req, res, next) => {
             }).catch(err => console.error('Failed to send verification SMS', err));
         }
 
-        sendResponse(res, 200, true, 'OTP sent for verification');
+        // Include OTP in response ONLY if email credentials are not set (for local testing)
+        const responseData = !process.env.EMAIL_PASS ? { otp } : undefined;
+        sendResponse(res, 200, true, 'OTP sent for verification', responseData);
     } catch (err) {
         next(err);
     }
@@ -126,7 +128,9 @@ exports.login = async (req, res, next) => {
             }).catch(err => console.error('Failed to send login alert SMS', err));
         }
 
-        sendResponse(res, 200, true, 'OTP sent for 2FA', { email: user.email });
+        // Include OTP in response ONLY if email credentials are not set (for local testing)
+        const responseData = !process.env.EMAIL_PASS ? { email: user.email, otp } : { email: user.email };
+        sendResponse(res, 200, true, 'OTP sent for 2FA', responseData);
     } catch (err) {
         next(err);
     }
@@ -202,7 +206,9 @@ exports.resendOtp = async (req, res, next) => {
             }).catch(err => console.error('Failed to resend auth SMS', err));
         }
 
-        sendResponse(res, 200, true, 'OTP resent via email and SMS');
+        // Include OTP in response ONLY if email credentials are not set (for local testing)
+        const responseData = !process.env.EMAIL_PASS ? { otp } : undefined;
+        sendResponse(res, 200, true, 'OTP resent via email and SMS', responseData);
     } catch (err) {
         next(err);
     }
@@ -259,7 +265,9 @@ exports.forgotPassword = async (req, res, next) => {
             }).catch(err => console.error('Failed to send forgot password SMS', err));
         }
 
-        sendResponse(res, 200, true, 'OTP sent to email and phone');
+        // Include OTP in response ONLY if email credentials are not set (for local testing)
+        const responseData = !process.env.EMAIL_PASS ? { otp } : undefined;
+        sendResponse(res, 200, true, 'OTP sent to email and phone', responseData);
     } catch (err) {
         next(err);
     }
