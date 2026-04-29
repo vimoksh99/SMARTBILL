@@ -13,6 +13,9 @@ const { startReminderJobs } = require('./jobs/reminderJobs');
 // Initialize Express App
 const app = express();
 
+// Trust reverse proxy (fixes Render X-Forwarded-For error)
+app.set('trust proxy', 1);
+
 // Connect to Database
 connectDB();
 
