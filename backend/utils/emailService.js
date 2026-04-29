@@ -23,9 +23,9 @@ const sendEmail = async (options) => {
 
     const transporter = nodemailer.createTransport({
         host: 'smtp.gmail.com',
-        port: 465,
-        secure: true, // true for port 465
-        family: 4, // Force IPv4 to fix Render's ENETUNREACH IPv6 issue
+        port: 587,
+        secure: false, // false for port 587
+        family: 4, // Force IPv4
         auth: {
             user: process.env.EMAIL_USER,
             pass: cleanPass,
