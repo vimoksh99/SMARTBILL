@@ -1,4 +1,4 @@
-const axios = require('axios');
+const nodemailer = require('nodemailer');
 const User = require('../models/User');
 
 const sendEmail = async (options) => {
@@ -12,34 +12,26 @@ const sendEmail = async (options) => {
         console.error('Error checking admin for email:', err);
     }
 
-    if (!process.env.BREVO_API_KEY) {
-        console.log(`[MOCK EMAIL] To: ${options.email}, Subject: ${options.subject}`);
-        console.log(`[MOCK EMAIL BODY]\n${options.message}`);
-        return;
-    }
-
     try {
-        const payload = {
-            sender: {
-                name: process.env.FROM_NAME || "SmartBill Support",
-                email: process.env.EMAIL_USER || "smartbilllpu@gmail.com"
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS,
             },
-            to: [{ email: options.email }],
+        });
+
+        const mailOptions = {
+            from: `"${process.env.FROM_NAME || 'SmartBill Support'}" <${process.env.EMAIL_USER}>`,
+            to: options.email,
             subject: options.subject,
-            htmlContent: options.message
+            html: options.message,
         };
 
-        const response = await axios.post('https://api.brevo.com/v3/smtp/email', payload, {
-            headers: {
-                'accept': 'application/json',
-                'api-key': process.env.BREVO_API_KEY,
-                'content-type': 'application/json'
-            }
-        });
-        
-        console.log('Email sent successfully via Brevo API:', response.data);
+        const info = await transporter.sendMail(mailOptions);
+        console.log('Email sent successfully via Nodemailer:', info.response);
     } catch (err) {
-        console.error('Brevo API Error:', err.response ? err.response.data : err.message);
+        console.error('Nodemailer API Error:', err);
         throw err;
     }
 };
