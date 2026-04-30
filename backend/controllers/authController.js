@@ -351,24 +351,17 @@ exports.testEmail = async (req, res, next) => {
             return res.status(400).json({ success: false, message: 'Email credentials not set', env: envStatus });
         }
 
-        const dns = require('dns');
-        const resolveIPv4 = (domain) => new Promise((resolve, reject) => {
-            dns.resolve4(domain, (err, addresses) => err ? reject(err) : resolve(addresses[0]));
-        });
-        const smtpHost = await resolveIPv4('smtp.gmail.com');
-
         const transporter = nodemailer.createTransport({
-            host: smtpHost,
-            port: 587,
-            secure: false,
-            requireTLS: true,
-            tls: {
-                servername: 'smtp.gmail.com'
-            },
+            host: "142.250.183.109", // ✅ Gmail IPv4 (no DNS, no IPv6)
+            port: 465,
+            secure: true,
             auth: {
                 user: process.env.EMAIL_USER,
                 pass: process.env.EMAIL_PASS,
             },
+            tls: {
+                servername: "smtp.gmail.com" // ✅ VERY IMPORTANT (SSL validation)
+            }
         });
 
         // Try verifying connection
