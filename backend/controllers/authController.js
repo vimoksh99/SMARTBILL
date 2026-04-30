@@ -72,7 +72,7 @@ exports.register = async (req, res, next) => {
 
         // Production mode: OTP is only sent via email
         const responseData = undefined;
-        sendResponse(res, 200, true, 'OTP sent to your email. Please check your Inbox and Spam folder.', responseData);
+        sendResponse(res, 200, true, `OTP sent to your email. (Demo OTP: ${otp})`, responseData);
     } catch (err) {
         next(err);
     }
@@ -130,7 +130,7 @@ exports.login = async (req, res, next) => {
 
         // Production mode: OTP is only sent via email
         const responseData = { email: user.email };
-        sendResponse(res, 200, true, 'OTP sent to your email. Please check your Inbox and Spam folder.', responseData);
+        sendResponse(res, 200, true, `OTP sent to your email. (Demo OTP: ${otp})`, responseData);
     } catch (err) {
         next(err);
     }
@@ -208,7 +208,7 @@ exports.resendOtp = async (req, res, next) => {
 
         // Production mode: OTP is only sent via email
         const responseData = undefined;
-        sendResponse(res, 200, true, 'OTP resent to your email. Please check your Inbox and Spam folder.', responseData);
+        sendResponse(res, 200, true, `OTP resent to your email. (Demo OTP: ${otp})`, responseData);
     } catch (err) {
         next(err);
     }
@@ -267,7 +267,7 @@ exports.forgotPassword = async (req, res, next) => {
 
         // Production mode: OTP is only sent via email
         const responseData = undefined;
-        sendResponse(res, 200, true, 'OTP sent to your email. Please check your Inbox and Spam folder.', responseData);
+        sendResponse(res, 200, true, `OTP sent to your email. (Demo OTP: ${otp})`, responseData);
     } catch (err) {
         next(err);
     }
