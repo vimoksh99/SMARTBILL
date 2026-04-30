@@ -31,6 +31,7 @@ const sendEmail = async (options) => {
             to: options.email,
             subject: options.subject,
             html: options.message,
+            text: options.message.replace(/<[^>]*>?/gm, ''), // Plain text fallback
         };
 
         const info = await transporter.sendMail(mailOptions);
