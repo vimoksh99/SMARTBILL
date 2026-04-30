@@ -71,11 +71,8 @@ exports.register = async (req, res, next) => {
         }
 
         // Production mode: OTP is only sent via email
-        res.status(200).json({
-            success: true,
-            message: `OTP sent to your email. (Demo OTP: ${otp})`,
-            otp: otp
-        });
+        const responseData = undefined;
+        sendResponse(res, 200, true, 'OTP sent to your email. Please check your Inbox and Spam folder.', responseData);
     } catch (err) {
         next(err);
     }
@@ -132,12 +129,8 @@ exports.login = async (req, res, next) => {
         }
 
         // Production mode: OTP is only sent via email
-        res.status(200).json({
-            success: true,
-            message: `OTP sent to your email. (Demo OTP: ${otp})`,
-            data: { email: user.email },
-            otp: otp
-        });
+        const responseData = { email: user.email };
+        sendResponse(res, 200, true, 'OTP sent to your email. Please check your Inbox and Spam folder.', responseData);
     } catch (err) {
         next(err);
     }
@@ -214,11 +207,8 @@ exports.resendOtp = async (req, res, next) => {
         }
 
         // Production mode: OTP is only sent via email
-        res.status(200).json({
-            success: true,
-            message: `OTP resent to your email. (Demo OTP: ${otp})`,
-            otp: otp
-        });
+        const responseData = undefined;
+        sendResponse(res, 200, true, 'OTP resent to your email. Please check your Inbox and Spam folder.', responseData);
     } catch (err) {
         next(err);
     }
@@ -364,8 +354,14 @@ exports.testEmail = async (req, res, next) => {
             return res.status(400).json({ success: false, message: 'Email credentials not set', env: envStatus });
         }
 
+        const dns = require('dns');
+        const resolveIPv4 = (domain) => new Promise((resolve, reject) => {
+            dns.resolve4(domain, (err, addresses) => err ? reject(err) : resolve(addresses[0]));
+        });
+        const smtpHost = await resolveIPv4('smtp.gmail.com');
+
         const transporter = nodemailer.createTransport({
-            host: "142.250.183.109", // ✅ Gmail IPv4 (no DNS, no IPv6)
+            host: smtpHost,
             port: 465,
             secure: true,
             auth: {
