@@ -8,7 +8,7 @@ const INTENTS = {
     VIEW_BILLS: ['show', 'view', 'list', 'my bills'],
     UPCOMING: ['upcoming', 'next'],
     HELP: ['help', 'what can you do', 'menu'],
-    REGISTER_COMPLAINT: ['complaint', 'report', 'issue', 'problem', 'register complaint']
+    REGISTER_COMPLAINT: ['complain', 'report', 'issue', 'problem', 'ticket', 'support']
 };
 
 const detectIntent = (text) => {
