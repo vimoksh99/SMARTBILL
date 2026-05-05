@@ -105,7 +105,10 @@
                 <div class="admin-table-container">
                     <div class="table-header-row">
                         <div class="table-title">Incoming Support Tickets</div>
-                        <button class="secondary-btn" style="padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="fetchComplaints()">↻ Refresh</button>
+                        <div style="display: flex; gap: 1rem; align-items: center;">
+                            <input type="text" id="search-tickets" placeholder="Search Ticket ID (e.g. SB-...)" style="padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid var(--glass-border); background: rgba(0,0,0,0.2); color: #fff;">
+                            <button class="secondary-btn" style="padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="fetchComplaints()">↻ Refresh</button>
+                        </div>
                     </div>
                     <table class="admin-table">
                         <thead>

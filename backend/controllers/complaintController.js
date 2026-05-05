@@ -12,13 +12,18 @@ exports.submitComplaint = async (req, res, next) => {
             return sendResponse(res, 400, false, 'Please add subject and message');
         }
 
+        const crypto = require('crypto');
+        const randomString = crypto.randomBytes(3).toString('hex').toUpperCase();
+        const ticketId = `SB-${randomString}`;
+
         const complaint = await Complaint.create({
+            ticketId,
             user: req.user.id,
             subject,
             message
         });
 
-        sendResponse(res, 201, true, 'Message submitted successfully. Admin will review it soon.', complaint);
+        sendResponse(res, 201, true, `Message submitted successfully. Your Ticket ID is ${ticketId}.`, complaint);
     } catch (err) {
         next(err);
     }

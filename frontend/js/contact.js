@@ -118,7 +118,17 @@ function renderTickets() {
         return;
     }
 
-    const displayData = showAllTickets ? myTicketsData : myTicketsData.slice(0, 1);
+    const searchTerm = document.getElementById('ticket-search')?.value.toLowerCase().trim() || '';
+    
+    let displayData = showAllTickets ? myTicketsData : myTicketsData.slice(0, 1);
+    
+    if (searchTerm) {
+        displayData = myTicketsData.filter(t => t.ticketId && t.ticketId.toLowerCase().includes(searchTerm));
+        if (displayData.length === 0) {
+            container.innerHTML = '<div style="color: #a0aec0; text-align: center; padding: 2rem;">No tickets found matching that ID.</div>';
+            return;
+        }
+    }
 
     displayData.forEach(t => {
         const date = new Date(t.createdAt).toLocaleDateString();
@@ -139,7 +149,12 @@ function renderTickets() {
         
         card.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.8rem;">
-                <h4 style="color: white; font-size: 1.2rem; margin: 0;">${t.subject}</h4>
+                <div>
+                    <h4 style="color: white; font-size: 1.2rem; margin: 0; display: flex; align-items: center; gap: 10px;">
+                        ${t.subject}
+                        <span style="font-size: 0.8rem; background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 4px; color: #cbd5e1;">${t.ticketId || 'N/A'}</span>
+                    </h4>
+                </div>
                 <span style="background: ${statusBg}; color: ${statusColor}; padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 700;">${t.status}</span>
             </div>
             <p style="color: #a0aec0; margin-bottom: 0.5rem; font-size: 0.95rem;">${t.message}</p>

@@ -180,6 +180,8 @@ window.deleteUser = async (id) => {
     }
 };
 
+let allComplaints = [];
+
 async function fetchComplaints() {
     try {
         const res = await fetch(API_BASE_URL + '/api/admin/complaints', {
@@ -187,11 +189,23 @@ async function fetchComplaints() {
         });
         const data = await res.json();
         if (data.success) {
-            renderComplaints(data.data);
+            allComplaints = data.data;
+            renderComplaints(allComplaints);
         }
     } catch (err) {
         console.error('Error fetching complaints', err);
     }
+}
+
+const searchTicketsInput = document.getElementById('search-tickets');
+if (searchTicketsInput) {
+    searchTicketsInput.addEventListener('input', (e) => {
+        const q = e.target.value.toLowerCase().trim();
+        const filtered = allComplaints.filter(c => 
+            c.ticketId && c.ticketId.toLowerCase().includes(q)
+        );
+        renderComplaints(filtered);
+    });
 }
 
 function renderComplaints(complaints) {
@@ -218,7 +232,10 @@ function renderComplaints(complaints) {
 
         tr.innerHTML = `
             <td>${userName}</td>
-            <td><strong>${c.subject}</strong></td>
+            <td>
+                <strong>${c.subject}</strong><br>
+                <span style="font-size: 0.8rem; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; color: #cbd5e1; margin-top: 4px; display: inline-block;">${c.ticketId || 'N/A'}</span>
+            </td>
             <td style="max-width: 300px; word-wrap: break-word; white-space: pre-wrap;">${c.message}</td>
             <td>${d}</td>
             <td>${statusBadge}</td>

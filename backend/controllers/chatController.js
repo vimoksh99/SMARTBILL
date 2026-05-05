@@ -143,9 +143,13 @@ exports.handleChat = async (req, res, next) => {
                 if (['yes', 'y'].includes(message.toLowerCase())) {
                     try {
                         const Complaint = require('../models/Complaint');
-                        await Complaint.create({ user: userId, subject: state.data.complaintSubject, message: state.data.complaintMessage });
+                        const crypto = require('crypto');
+                        const randomString = crypto.randomBytes(3).toString('hex').toUpperCase();
+                        const ticketId = `SB-${randomString}`;
+
+                        await Complaint.create({ ticketId, user: userId, subject: state.data.complaintSubject, message: state.data.complaintMessage });
                         clearChatState(userId);
-                        return sendResponse(res, 200, true, 'Chatbot reply', { reply: `Successfully registered your complaint! Our team will look into it.`, action: 'refresh_complaints' });
+                        return sendResponse(res, 200, true, 'Chatbot reply', { reply: `Successfully registered your complaint! Your Ticket ID is: **${ticketId}**.`, action: 'refresh_complaints' });
                     } catch(err) {
                         clearChatState(userId);
                         return sendResponse(res, 200, true, 'Chatbot reply', { reply: `Oops, something went wrong submitting your complaint.` });
@@ -191,6 +195,25 @@ exports.handleChat = async (req, res, next) => {
                 setChatState(userId, state);
                 return sendResponse(res, 200, true, 'Chatbot reply', { reply: 'I can help you register a complaint. What is the subject of your complaint?' });
             }
+            
+            // Check for direct ticket ID query (e.g. SB-123ABC)
+            const ticketMatch = message.match(/SB-[A-Z0-9]{6}/i);
+            if (ticketMatch || message.toLowerCase().includes('status')) {
+                const searchId = ticketMatch ? ticketMatch[0].toUpperCase() : null;
+                if (searchId) {
+                    const Complaint = require('../models/Complaint');
+                    const ticket = await Complaint.findOne({ ticketId: searchId, user: userId });
+                    if (ticket) {
+                        let responseText = `Ticket **${ticket.ticketId}** is currently **${ticket.status}**.\nSubject: ${ticket.subject}`;
+                        if (ticket.status === 'Resolved' && ticket.adminReply) {
+                            responseText += `\n\nAdmin Reply: ${ticket.adminReply}`;
+                        }
+                        return sendResponse(res, 200, true, 'Chatbot reply', { reply: responseText });
+                    } else {
+                        return sendResponse(res, 200, true, 'Chatbot reply', { reply: `I couldn't find a ticket with ID ${searchId} in your account.` });
+                    }
+                }
+            }
         }
 
         // -- AI FALLBACK (GenAI) --
@@ -223,7 +246,7 @@ exports.handleChat = async (req, res, next) => {
 Provide simple, short, and concise answers to all queries.
 
 RULES:
-1. GENERAL KNOWLEDGE: If the user asks ANY question (like history, science, geography, general facts, etc.), you MUST answer them directly and concisely using your own knowledge and the Live Fact provided below.
+1. GENERAL KNOWLEDGE: If the user asks ANY question (like news, politics, elections, history, science, etc.), you MUST answer them directly and concisely using your own knowledge and the Live Fact provided below. Do not refuse to answer. Do not say you are an AI or only help with bills. Answer the question.
 2. LOAN INQUIRIES: If the user asks about loans, provide a very brief summary (like what it is used for and basic info) and provide helpful general links or direct them to trusted external financial resources.
 3. CONCISENESS: Keep all your answers relatively brief and to the point.
 4. SMARTBILL APP: If they ask about bills or the app, assist them helpfully as the SmartBill assistant.
