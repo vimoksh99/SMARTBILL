@@ -161,61 +161,15 @@ exports.handleChat = async (req, res, next) => {
         try {
             const Groq = require('groq-sdk');
             const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-            const axios = require('axios');
-            const cheerio = require('cheerio');
-            
-            // 1. Pre-fetch real-time context using Google News RSS & Wikipedia (RAG Pattern)
-            const searchWeb = async (query) => {
-                let context = "";
-                
-                // Fetch live news headlines for current events (like 'yesterday's match')
-                try {
-                    const { data: newsData } = await axios.get(`https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=en-IN&gl=IN&ceid=IN:en`);
-                    const $ = cheerio.load(newsData, { xmlMode: true });
-                    let newsItems = [];
-                    $('item').slice(0, 5).each((i, el) => {
-                        newsItems.push(`- ` + $(el).find('title').text());
-                    });
-                    if (newsItems.length) {
-                        context += "LIVE NEWS HEADLINES:\n" + newsItems.join('\n') + "\n\n";
-                    }
-                } catch (e) {
-                    console.error("News fetch failed", e.message);
-                }
-
-                // Fetch encyclopedic facts from Wikipedia
-                try {
-                    const { data: wikiData } = await axios.get(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&utf8=&format=json`, {
-                        headers: { 'User-Agent': 'SmartBillChatbot/1.0 (https://github.com/my-smartbill)' }
-                    });
-                    if (wikiData && wikiData.query && wikiData.query.search && wikiData.query.search.length > 0) {
-                        let results = wikiData.query.search.slice(0, 3).map(r => r.snippet.replace(/<\/?[^>]+(>|$)/g, ""));
-                        context += "WIKIPEDIA FACTS:\n- " + results.join('\n- ');
-                    }
-                } catch (e) {
-                    console.error("Wiki fetch failed", e.message);
-                }
-                
-                return context;
-            };
-
-            let wikiContext = "";
-            if (!image && message) {
-                wikiContext = await searchWeb(message);
-            }
-
             const systemInstruction = `You are the SmartBill assistant, an AI chatbot exclusively for the SmartBill application.
 Provide simple, short, and concise answers to all queries.
 
 RULES:
 1. GREETINGS: If the user says "hi", "hello", or similar common greetings, reply to them simply and naturally (e.g., "Hello! How can I help you with your bills today?"). Do not give long factual definitions, trivia, or irrelevant details about words.
-2. SCOPE: You must ONLY answer questions that are related to the SmartBill application, managing bills, analyzing invoices, or personal finance.
-3. OUT OF SCOPE: If the user asks ANY question outside of this scope (like sports, weather, unrelated facts, etc.), you MUST politely decline and state that you can only help with SmartBill and managing bills.
-
-Live context:
----
-${wikiContext || "No specific real-time context found."}
----`;
+2. SCOPE: You must ONLY answer questions that are related to the SmartBill application, managing bills, analyzing invoices, or personal finance tracking within the app.
+3. LOAN INQUIRIES: If the user asks about loans, do not refuse entirely. Instead, provide only a very brief summary (like what it is used for and basic info) and provide helpful general links or direct them to trusted external financial resources. Do not provide extensive information.
+4. OUT OF SCOPE: If the user asks ANY question outside of this scope (like sports, weather, unrelated facts, etc.), you MUST politely decline and state that you can only help with SmartBill and managing bills.
+5. STRICTLY NO EXTERNAL SEARCH: Do not provide information that would typically require a Google search or Wikipedia. Stick entirely to your persona as an app assistant, except for brief loan definitions and links as described in rule 3.`;
 
             let messages = [
                 { role: 'system', content: systemInstruction }
