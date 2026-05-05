@@ -1,4 +1,4 @@
-const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:') ? 'http://localhost:3000' : 'https://smartbill-bf0b.onrender.com';
+const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:') ? 'http://localhost:3000' : 'https://smartbill-x2gv.vercel.app';
 // Check Authentication & Role
 const token = localStorage.getItem('token');
 const userStr = localStorage.getItem('user');
