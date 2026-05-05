@@ -46,8 +46,8 @@ app.use('/api/founders', require('./routes/founderRoutes'));
 // Global Error Handler Middleware
 app.use(errorHandler);
 
-// Start Cron Jobs
-startReminderJobs();
+// Start Cron Jobs (Disabled for Vercel Serverless)
+// startReminderJobs();
 
 // Seed Admins
 const seedAdmin = async () => {
@@ -75,7 +75,7 @@ const seedAdmin = async () => {
         console.error('Failed to seed admins', err);
     }
 };
-seedAdmin();
+// Disabled for Vercel: seedAdmin();
 
 // Start Server
 if (process.env.NODE_ENV !== 'production') {
