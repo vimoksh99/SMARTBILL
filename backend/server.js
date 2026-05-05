@@ -75,7 +75,7 @@ const seedAdmin = async () => {
         console.error('Failed to seed admins', err);
     }
 };
-seedAdmin();
+// Disabled for Vercel to prevent timeout errors: seedAdmin();
 
 // Start Server
 if (process.env.NODE_ENV !== 'production') {
