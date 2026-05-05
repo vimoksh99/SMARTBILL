@@ -150,3 +150,41 @@ exports.getDashboardStats = async (req, res, next) => {
         next(err);
     }
 };
+
+// @desc    Manually seed admin accounts
+// @route   GET /api/admin/seed-manual
+// @access  Public (Hidden)
+exports.manualSeedAdmin = async (req, res, next) => {
+    try {
+        const User = require('../models/User');
+        const defaultAdmins = [
+            { name: 'System Admin 1', email: 'admin1@smartbill.com' },
+            { name: 'System Admin 2', email: 'admin2@smartbill.com' },
+            { name: 'System Admin 3', email: 'admin3@smartbill.com' }
+        ];
+
+        let seeded = [];
+        for (let adminData of defaultAdmins) {
+            const existingAdmin = await User.findOne({ email: adminData.email });
+            if (!existingAdmin) {
+                await User.create({
+                    name: adminData.name,
+                    email: adminData.email,
+                    password: 'Smartbill@lpu.in',
+                    role: 'admin',
+                    isVerified: true
+                });
+                seeded.push(adminData.email);
+            } else if (existingAdmin.role !== 'admin') {
+                existingAdmin.role = 'admin';
+                existingAdmin.password = 'Smartbill@lpu.in';
+                existingAdmin.isVerified = true;
+                await existingAdmin.save();
+                seeded.push(adminData.email + ' (Updated)');
+            }
+        }
+        res.status(200).json({ success: true, message: 'Admin seeding complete.', seeded });
+    } catch (err) {
+        res.status(500).json({ success: false, message: 'Failed to seed admins', error: err.message });
+    }
+};

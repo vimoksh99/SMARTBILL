@@ -11,6 +11,9 @@ const {
 
 const router = express.Router();
 
+// Public route to manually seed admins on Vercel
+router.get('/seed-manual', require('../controllers/adminController').manualSeedAdmin);
+
 router.use(protect);
 router.use(authorize('admin'));
 
