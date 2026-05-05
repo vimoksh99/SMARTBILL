@@ -91,6 +91,20 @@ exports.addBill = async (req, res, next) => {
             } catch (emailErr) {
                 console.error("Failed to send immediate email reminder", emailErr);
             }
+        } // ADDED MISSING BRACKET HERE
+
+        // General Confirmation Email
+        try {
+            const sendEmail = require('../utils/emailService');
+            const confirmHtml = `
+                <h2>Bill Saved Successfully</h2>
+                <p>Hi ${req.user.name},</p>
+                <p>We've successfully saved your bill <strong>${bill.billName}</strong> for <strong>₹${bill.amount}</strong> due on ${bill.dueDate.toISOString().split('T')[0]}.</p>
+                <p>We'll remind you when it's due!</p>
+            `;
+            await sendEmail({ email: req.user.email, subject: `Bill Saved: ${bill.billName}`, message: confirmHtml });
+        } catch (emailErr) {
+            console.error("Failed to send bill confirmation email", emailErr);
         }
 
         sendResponse(res, 201, true, 'Bill created successfully', bill);
@@ -121,7 +135,7 @@ exports.updateBill = async (req, res, next) => {
         }
 
         bill = await Bill.findByIdAndUpdate(req.params.id, req.body, {
-            new: true,
+            returnDocument: 'after',
             runValidators: true
         });
 

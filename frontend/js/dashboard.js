@@ -165,6 +165,8 @@ async function fetchBills() {
 
     emptyState.style.display = 'none';
     container.innerHTML = '';
+    
+    window.billsData = data;
 
     data.forEach(bill => {
         const card = document.createElement('div');
@@ -185,6 +187,7 @@ async function fetchBills() {
             </div>
             <div class="bill-actions">
                 ${!isPaid ? `<button class="primary-btn" onclick="openPayment('${bill.paymentLink}', '${bill._id}')">Pay Now</button>` : ''}
+                <button class="secondary-btn" onclick="openEditModal('${bill._id}')">Edit</button>
                 <button class="secondary-btn" onclick="deleteBill('${bill._id}')">Delete</button>
             </div>
         `;
@@ -193,6 +196,22 @@ async function fetchBills() {
 }
 
 function openAddModal() {
+    document.getElementById('modal-title').innerText = 'Add Bill';
+    document.getElementById('bill-id').value = '';
+    document.getElementById('bill-form').reset();
+    document.getElementById('bill-modal').style.display = 'flex';
+}
+
+function openEditModal(id) {
+    const bill = window.billsData.find(b => b._id === id);
+    if (!bill) return;
+    document.getElementById('modal-title').innerText = 'Edit Bill';
+    document.getElementById('bill-id').value = bill._id;
+    document.getElementById('bill-name').value = bill.billName;
+    document.getElementById('bill-amount').value = bill.amount;
+    document.getElementById('bill-due-date').value = new Date(bill.dueDate).toISOString().split('T')[0];
+    document.getElementById('bill-category').value = bill.category;
+    document.getElementById('bill-link').value = bill.paymentLink;
     document.getElementById('bill-modal').style.display = 'flex';
 }
 
@@ -202,6 +221,7 @@ function closeModal() {
 
 document.getElementById('bill-form').addEventListener('submit', async (e) => {
     e.preventDefault();
+    const billId = document.getElementById('bill-id').value;
     const payload = {
         billName: document.getElementById('bill-name').value,
         amount: parseFloat(document.getElementById('bill-amount').value),
@@ -210,8 +230,11 @@ document.getElementById('bill-form').addEventListener('submit', async (e) => {
         paymentLink: document.getElementById('bill-link').value
     };
 
-    const res = await fetch(API_BASE_URL + '/api/bills', {
-        method: 'POST',
+    const method = billId ? 'PUT' : 'POST';
+    const url = billId ? `${API_BASE_URL}/api/bills/${billId}` : `${API_BASE_URL}/api/bills`;
+
+    const res = await fetch(url, {
+        method: method,
         headers: { 
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}` 
@@ -222,6 +245,7 @@ document.getElementById('bill-form').addEventListener('submit', async (e) => {
     if (res.ok) {
         closeModal();
         e.target.reset();
+        document.getElementById('bill-id').value = '';
         refreshAll();
     }
 });

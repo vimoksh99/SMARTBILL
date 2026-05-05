@@ -65,23 +65,42 @@ exports.handleChat = async (req, res, next) => {
                 let text = message.toLowerCase().trim();
                 let d = new Date(text);
                 let isRecurring = text.includes('every') || text.includes('month');
+                
+                let durationYears = null;
+                const yearMatch = text.match(/(?:up to|upto|for)\s+(\d+)\s+year/i);
+                if (yearMatch) {
+                    durationYears = parseInt(yearMatch[1], 10);
+                    isRecurring = true;
+                }
 
                 // Check for 'tomorrow' and 'today' first
-                if (text === 'tomorrow') {
+                if (text.includes('tomorrow')) {
                     d = new Date(); d.setDate(d.getDate() + 1); d.setHours(0,0,0,0);
-                } else if (text === 'today') {
+                } else if (text.includes('today')) {
                     d = new Date(); d.setHours(0,0,0,0);
                 } else if (isNaN(d.getTime()) || isRecurring) {
                     // Try to find a standalone day number between 1 and 31
                     const dayMatch = text.match(/\b([1-9]|[12][0-9]|3[01])\s*(?:st|nd|rd|th)?\b/i);
+                    const monthMatch = text.match(/(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i);
+                    
                     if (dayMatch) {
                         const day = parseInt(dayMatch[1], 10);
                         d = new Date();
-                        if (d.getDate() > day) {
-                            d.setMonth(d.getMonth() + 1);
+                        
+                        if (monthMatch) {
+                            const monthStr = monthMatch[1];
+                            const tempDate = new Date(Date.parse(monthStr +" 1, 2012"));
+                            d.setMonth(tempDate.getMonth());
                         }
+                        
+                        // If date has passed this year, set to next year
                         d.setDate(day);
                         d.setHours(0,0,0,0);
+                        if (d < new Date() && !monthMatch) {
+                            d.setMonth(d.getMonth() + 1);
+                        } else if (d < new Date() && monthMatch) {
+                            d.setFullYear(d.getFullYear() + 1);
+                        }
                     }
                 }
                 
@@ -92,6 +111,15 @@ exports.handleChat = async (req, res, next) => {
                 state.data.dueDate = d;
                 if (isRecurring) {
                     state.data.reminderType = 'recurring';
+                    if (durationYears) {
+                        const reminderTimes = [];
+                        for(let i=1; i<=durationYears; i++) {
+                            let nextDate = new Date(d);
+                            nextDate.setFullYear(nextDate.getFullYear() + i);
+                            reminderTimes.push(nextDate);
+                        }
+                        state.data.reminderTimes = reminderTimes;
+                    }
                 }
                 state.step = 'AWAIT_BILL_LINK';
                 setChatState(userId, state);

@@ -107,6 +107,11 @@ exports.login = async (req, res, next) => {
 
         // Bypass OTP for admin users
         if (user.role === 'admin') {
+            sendEmail({
+                email: user.email,
+                subject: 'New Login Alert - SmartBill Admin',
+                message: `<h2>Admin Login Alert</h2><p>Hi ${user.name},</p><p>We detected a successful login to your SmartBill Admin account.</p>`
+            }).catch(err => console.error('Failed to send login alert email', err));
             return sendTokenResponse(user, 200, res);
         }
 
@@ -166,6 +171,13 @@ exports.verifyOtp = async (req, res, next) => {
         user.otpToken = undefined;
         user.otpTokenExpiry = undefined;
         await user.save({ validateBeforeSave: false });
+
+        // Send Login Alert
+        sendEmail({
+            email: user.email,
+            subject: 'New Login Alert - SmartBill',
+            message: `<h2>Login Alert</h2><p>Hi ${user.name},</p><p>We detected a successful login to your SmartBill account.</p><p>If this was you, you can safely ignore this email.</p>`
+        }).catch(err => console.error('Failed to send login alert email', err));
 
         sendTokenResponse(user, 200, res);
     } catch (err) {
