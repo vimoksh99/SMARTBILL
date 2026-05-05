@@ -7,7 +7,8 @@ const INTENTS = {
     ADD_BILL: ['add', 'create', 'new bill'],
     VIEW_BILLS: ['show', 'view', 'list', 'my bills'],
     UPCOMING: ['upcoming', 'next'],
-    HELP: ['help', 'what can you do', 'menu']
+    HELP: ['help', 'what can you do', 'menu'],
+    REGISTER_COMPLAINT: ['complaint', 'report', 'issue', 'problem', 'register complaint']
 };
 
 const detectIntent = (text) => {
@@ -121,6 +122,39 @@ exports.handleChat = async (req, res, next) => {
                     return sendResponse(res, 200, true, 'Chatbot reply', { reply: `Okay, I discarded it.` });
                 }
             }
+
+            if (state.step === 'AWAIT_COMPLAINT_SUBJECT') {
+                state.data.complaintSubject = message;
+                state.step = 'AWAIT_COMPLAINT_MESSAGE';
+                setChatState(userId, state);
+                return sendResponse(res, 200, true, 'Chatbot reply', { reply: `Got it. Subject: "${message}". Now, please provide the details/message for your complaint.` });
+            }
+
+            if (state.step === 'AWAIT_COMPLAINT_MESSAGE') {
+                state.data.complaintMessage = message;
+                state.step = 'AWAIT_CONFIRM_COMPLAINT';
+                setChatState(userId, state);
+                return sendResponse(res, 200, true, 'Chatbot reply', { 
+                    reply: `Alright, here's the summary:\nSubject: ${state.data.complaintSubject}\nMessage: ${state.data.complaintMessage}\nShall I submit this complaint? (Yes/No)` 
+                });
+            }
+
+            if (state.step === 'AWAIT_CONFIRM_COMPLAINT') {
+                if (['yes', 'y'].includes(message.toLowerCase())) {
+                    try {
+                        const Complaint = require('../models/Complaint');
+                        await Complaint.create({ user: userId, subject: state.data.complaintSubject, message: state.data.complaintMessage });
+                        clearChatState(userId);
+                        return sendResponse(res, 200, true, 'Chatbot reply', { reply: `Successfully registered your complaint! Our team will look into it.`, action: 'refresh_complaints' });
+                    } catch(err) {
+                        clearChatState(userId);
+                        return sendResponse(res, 200, true, 'Chatbot reply', { reply: `Oops, something went wrong submitting your complaint.` });
+                    }
+                } else {
+                    clearChatState(userId);
+                    return sendResponse(res, 200, true, 'Chatbot reply', { reply: `Okay, I discarded the complaint.` });
+                }
+            }
         }
 
         // -- INTENT DETECTION (IDLE STATE) --
@@ -149,7 +183,13 @@ exports.handleChat = async (req, res, next) => {
             }
 
             if (intent === 'HELP') {
-                return sendResponse(res, 200, true, 'Chatbot reply', { reply: `I can help you manage your bills. Try saying:\n- "Add a bill"\n- "Show my bills"\n- "Show upcoming"` });
+                return sendResponse(res, 200, true, 'Chatbot reply', { reply: `I can help you manage your bills. Try saying:\n- "Add a bill"\n- "Show my bills"\n- "Show upcoming"\n- "Register complaint"` });
+            }
+
+            if (intent === 'REGISTER_COMPLAINT') {
+                state.step = 'AWAIT_COMPLAINT_SUBJECT';
+                setChatState(userId, state);
+                return sendResponse(res, 200, true, 'Chatbot reply', { reply: 'I can help you register a complaint. What is the subject of your complaint?' });
             }
         }
 
@@ -161,14 +201,35 @@ exports.handleChat = async (req, res, next) => {
         try {
             const Groq = require('groq-sdk');
             const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+            const axios = require('axios');
+            
+            // Fast info fetch for new information
+            const searchFast = async (query) => {
+                try {
+                    const { data } = await axios.get(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&utf8=&format=json`, { timeout: 2000 });
+                    if (data?.query?.search?.length > 0) {
+                        return "Live Fact: " + data.query.search[0].snippet.replace(/<\/?[^>]+(>|$)/g, "");
+                    }
+                } catch (e) {}
+                return "";
+            };
+            
+            let liveInfo = "";
+            if (!image && message) {
+                liveInfo = await searchFast(message);
+            }
+
             const systemInstruction = `You are the SmartBill assistant, an AI chatbot exclusively for the SmartBill application.
 Provide simple, short, and concise answers to all queries.
 
 RULES:
-1. GENERAL KNOWLEDGE: If the user asks ANY question (like history, science, geography, general facts, etc.), you MUST answer them directly and concisely using your own knowledge. Do not reject the question.
+1. GENERAL KNOWLEDGE: If the user asks ANY question (like history, science, geography, general facts, etc.), you MUST answer them directly and concisely using your own knowledge and the Live Fact provided below.
 2. LOAN INQUIRIES: If the user asks about loans, provide a very brief summary (like what it is used for and basic info) and provide helpful general links or direct them to trusted external financial resources.
 3. CONCISENESS: Keep all your answers relatively brief and to the point.
-4. SMARTBILL APP: If they ask about bills or the app, assist them helpfully as the SmartBill assistant.`;
+4. SMARTBILL APP: If they ask about bills or the app, assist them helpfully as the SmartBill assistant.
+
+Context (if any):
+${liveInfo}`;
 
             let messages = [
                 { role: 'system', content: systemInstruction }
@@ -195,7 +256,7 @@ RULES:
                 for (let i = 0; i < maxRetries; i++) {
                     try {
                         const payload = {
-                            model: image ? 'llama-3.2-11b-vision-preview' : 'llama-3.3-70b-versatile',
+                            model: image ? 'llama-3.2-11b-vision-preview' : 'llama-3.1-8b-instant',
                             messages: messagesArray,
                             temperature: 0.7,
                             max_completion_tokens: 1024,
