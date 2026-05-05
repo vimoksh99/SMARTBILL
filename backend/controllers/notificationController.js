@@ -29,3 +29,14 @@ exports.markAsRead = async (req, res, next) => {
         next(err);
     }
 };
+// @desc    Clear all notifications for user
+// @route   DELETE /api/notifications
+// @access  Private
+exports.clearAllNotifications = async (req, res, next) => {
+    try {
+        await Notification.deleteMany({ userId: req.user.id });
+        sendResponse(res, 200, true, 'All notifications cleared');
+    } catch (err) {
+        next(err);
+    }
+};

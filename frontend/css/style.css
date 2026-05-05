@@ -50,7 +50,7 @@ body {
     letter-spacing: 0.015em;
 }
 
-/* --- ULTRA ADVANCED ANIMATED MESH GRADIENT BACKGROUND --- */
+/* --- LIVE BUBBLE BACKGROUND (ANTIGRAVITY STYLE) --- */
 body::before, body::after {
     content: "";
     position: fixed;
@@ -63,25 +63,36 @@ body::before, body::after {
 }
 
 body::before {
-    background: 
-        radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.15), transparent 25%),
-        radial-gradient(circle at 85% 30%, rgba(236, 72, 153, 0.15), transparent 25%),
-        radial-gradient(circle at 50% 80%, rgba(20, 184, 166, 0.15), transparent 25%);
-    filter: blur(60px);
-    animation: pulseMesh 15s ease-in-out infinite alternate;
+    /* Base subtle gradient */
+    background: linear-gradient(135deg, rgba(3, 3, 5, 1) 0%, rgba(15, 15, 25, 1) 100%);
 }
 
 body::after {
-    /* Subtle noise texture */
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-    opacity: 0.025;
-    mix-blend-mode: overlay;
+    /* Floating Bubbles using multiple box shadows */
+    width: 20px;
+    height: 20px;
+    background: transparent;
+    border-radius: 50%;
+    top: 100%;
+    left: 0;
+    box-shadow: 
+        10vw -10vh 0 10px rgba(99, 102, 241, 0.15),
+        25vw -30vh 0 30px rgba(236, 72, 153, 0.1),
+        45vw -55vh 0 15px rgba(20, 184, 166, 0.15),
+        65vw -20vh 0 20px rgba(99, 102, 241, 0.12),
+        85vw -80vh 0 40px rgba(236, 72, 153, 0.08),
+        30vw -90vh 0 25px rgba(20, 184, 166, 0.1),
+        75vw -60vh 0 15px rgba(139, 92, 246, 0.12),
+        15vw -75vh 0 35px rgba(99, 102, 241, 0.08),
+        55vw -35vh 0 20px rgba(236, 72, 153, 0.1);
+    animation: floatBubbles 20s linear infinite;
 }
 
-@keyframes pulseMesh {
-    0% { transform: scale(1) translate(0, 0); opacity: 0.8; }
-    50% { transform: scale(1.1) translate(-2%, 2%); opacity: 1; }
-    100% { transform: scale(1) translate(2%, -2%); opacity: 0.8; }
+@keyframes floatBubbles {
+    0% { transform: translateY(0); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateY(-120vh); opacity: 0; }
 }
 
 /* Base Components */
@@ -400,19 +411,21 @@ h1, h2, h3, h4 {
 
 .badge {
     position: absolute;
-    top: -5px;
-    right: -5px;
-    background: var(--danger);
+    top: -8px;
+    right: -8px;
+    background: linear-gradient(135deg, var(--danger) 0%, #ff6b6b 100%);
     color: white;
     font-size: 0.75rem;
     font-weight: 800;
-    min-width: 20px;
-    height: 20px;
+    padding: 0 6px;
+    min-width: 22px;
+    height: 22px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 10px;
-    box-shadow: 0 0 0 3px var(--bg-base);
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4), 0 0 0 3px var(--bg-base);
+    letter-spacing: 0;
 }
 
 /* Dashboard Analytics Bar */

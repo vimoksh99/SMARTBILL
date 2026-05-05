@@ -115,14 +115,14 @@ async function markAsRead(id) {
 async function markAllAsRead(e) {
     if(e) e.stopPropagation();
     try {
-        const unreadNotifs = notificationsData.filter(n => !n.read);
-        for(let n of unreadNotifs) {
-            await fetch(`${API_BASE_URL}/api/notifications/${n._id}/read`, {
-                method: 'PUT',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
+        const res = await fetch(`${API_BASE_URL}/api/notifications`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if(res.ok) {
+            notificationsData = [];
+            renderNotifications();
         }
-        fetchNotifications();
     } catch(err) { console.error(err); }
 }
 
