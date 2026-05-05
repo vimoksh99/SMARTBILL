@@ -56,8 +56,8 @@ exports.register = async (req, res, next) => {
         console.log(`\n==== NEW USER OTP GENERATED: ${otp} ====\n`);
         await user.save();
         
-        // Send OTPs asynchronously to prevent blocking the response
-        sendEmail({
+        // Send OTPs immediately before responding to prevent Vercel from freezing the background task
+        await sendEmail({
             email: user.email,
             subject: 'Verify your SmartBill Account',
             message: `<h2>Welcome to SmartBill!</h2><p>Hi ${user.name}, please verify your account. Your OTP is: <strong>${otp}</strong></p>`
@@ -114,8 +114,8 @@ exports.login = async (req, res, next) => {
         console.log(`\n==== LOGIN OTP GENERATED: ${otp} ====\n`);
         await user.save({ validateBeforeSave: false });
 
-        // Send OTPs asynchronously
-        sendEmail({
+        // Send OTPs immediately before responding to prevent Vercel from freezing the background task
+        await sendEmail({
             email: user.email,
             subject: 'Login OTP - SmartBill',
             message: `<h2>Login Attempt</h2><p>Hi ${user.name}, your login OTP is: <strong>${otp}</strong></p>`

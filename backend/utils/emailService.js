@@ -1,6 +1,5 @@
 const nodemailer = require('nodemailer');
 const dns = require('dns');
-const User = require('../models/User');
 
 const resolveIPv4 = (domain) => {
     return new Promise((resolve, reject) => {
@@ -11,20 +10,14 @@ const resolveIPv4 = (domain) => {
     });
 };
 
-const sendEmail = async (options) => {
-    try {
-        const user = await User.findOne({ email: options.email });
-        if (user && user.role === 'admin') {
-            console.log(`[EMAIL BLOCKED] Admin account ${options.email} bypassed email sending.`);
-            return;
-        }
-    } catch (err) {
-        console.error('Error checking admin for email:', err);
-    }
+let transporter;
 
-    try {
+const getTransporter = async () => {
+    if (!transporter) {
         const smtpHost = await resolveIPv4('smtp.gmail.com');
-        const transporter = nodemailer.createTransport({
+        transporter = nodemailer.createTransport({
+            pool: true,
+            maxConnections: 1,
             host: smtpHost,
             port: 465,
             secure: true,
@@ -33,9 +26,16 @@ const sendEmail = async (options) => {
                 pass: process.env.EMAIL_PASS,
             },
             tls: {
-                servername: "smtp.gmail.com" // ✅ VERY IMPORTANT (SSL validation)
+                servername: "smtp.gmail.com"
             }
         });
+    }
+    return transporter;
+};
+
+const sendEmail = async (options) => {
+    try {
+        const mailer = await getTransporter();
 
         const mailOptions = {
             from: `"${process.env.FROM_NAME || 'SmartBill Support'}" <${process.env.EMAIL_USER}>`,
